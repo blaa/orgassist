@@ -100,13 +100,15 @@ class TestOrg(unittest.TestCase):
                                  DateType.RANGE)
             if 'OPEN_TASK' in event.tags:
                 self.assertEqual(event.priority, None)
-                self.assertEqual(event.state, 'TODO')
+                self.assertEqual(event.state.name, 'TODO')
+                self.assertTrue(event.state.is_open)
                 self.assertIn(DateType.SCHEDULED, event.date_types)
                 self.assertEqual(event.relevant_date.date_type,
                                  DateType.SCHEDULED)
             if 'DEADLINE' in event.tags:
                 relevant = event.relevant_date
-                self.assertEqual(event.state, 'DONE')
+                self.assertEqual(event.state.name, 'DONE')
+                self.assertFalse(event.state.is_open)
                 self.assertEqual(relevant.date_type,
                                  DateType.DEADLINE)
                 self.assertFalse(relevant.appointment)

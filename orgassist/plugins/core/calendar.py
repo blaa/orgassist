@@ -22,10 +22,9 @@ class CalendarCore(AssistantPlugin):
             self.scheduler.every().day.at(time).do(self.send_agenda)
 
         # Incoming notifications
-        self.notify_queues = {}
+        self.notify_dedups = []
         for time in self.agenda_times:
             delta = dt.timedelta(minutes=time)
-
 
     def schedule_notifications(self):
         "Schedule incoming notifications"

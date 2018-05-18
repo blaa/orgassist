@@ -1,0 +1,103 @@
+---
+
+log:
+  level: INFO
+
+bots:
+  # XMPP account configuration
+  xmpp:
+    jid: 'botjid@domain.com'
+    password: 'password'
+
+  # FUTURE:
+  #irc:
+  #  server: ...
+  #  nickname: ...
+
+# FUTURE: Register external plugins, not conveyed in orgassist package.
+register_plugins: []
+
+# Multiple assistants handling different plugins, org directories, etc, at the
+# same time are possible each for a different bosses.
+
+assistants:
+  # Instance name
+  main:
+    # All communications channels
+    # all to single person or to multiple people.
+    channels:
+      - jid: 'controller.jid@domain.com'
+        # Filter by resource too
+        # resource: null
+        # FUTURE:
+        # name: 'in future to address directly'
+        # email:?
+        # irc_nick:
+      #- jid: 'multiple.controllers.possible@domain.com'
+
+    # Naming a plugin in config enables is.
+    plugins:
+      # A common calendar/agenda plugin - dependency of org.
+      calendar:
+        # Number of minutes to notify before event happens
+        notify_before_m:
+          - 30
+          - 10
+
+        agenda:
+          # When should Agenda be automatically sent?
+          times:
+            - '7:00'
+            - '12:00'
+
+          # Hours to look forward and backward.
+          horizon_incoming: 24
+          horizon_unfinished: 720
+
+          # Use default, or one given at path
+          #agenda_template_path: '~/.org/agenda.txt.j2'
+
+      org:
+        # Path to handled ORG directory
+        directory: ~/.org/
+        # Regexp to identify org-mode files in the directory
+        org_regexp: '[^.].*\.org$'
+
+        # Additional files (full paths)
+        files: []
+
+        # Configuration of taking notes
+        note:
+          # Place to store notes
+          inbox: ~/.org/assistant.org
+
+          # Auto schedule for evening the same day - so you can go through them
+          # evening, null
+          auto_schedule: 'evening'
+
+          # FUTURE: Use git on ORG repositories (commit after each change)
+          git_commit: true
+
+        # Rescan org tree and gather data
+        scan_interval_s: 300
+
+        # Identified statuses/todo states
+        todos:
+          # Considered 'todo/open'
+          open: ['TODO', 'DELEGATED']
+
+          # Todos considered "closed/done"
+          closed: ['DONE', 'CANCELLED', 'DEFERRED']
+
+          # Identify entries which group other todos
+          project: 'PROJECT'
+
+        # FUTURE: Anonymize the contents of entries with one of this tags
+        private_tags: ['PRIVATE', 'PRIV', 'SECRET']
+
+
+      # Generic command plugin
+      #command:
+      #  panic:
+      #    shell: 'sudo poweroff'
+
