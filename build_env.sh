@@ -1,7 +1,8 @@
 #!/bin/bash
 
-python3 -m venv ENV
-source ENV/bin/activate
+ENV=~/orgsec_ENV
+python3 -m venv $ENV
+source $ENV/bin/activate
 
 pip3 install wheel
 pip3 install -r requirements.txt
