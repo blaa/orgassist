@@ -5,3 +5,6 @@ config.yml
 *~
 __pycache__
 .emacs.desktop*
+build/
+dist/
+*.egg-info

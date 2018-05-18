@@ -29,6 +29,7 @@
    Alter orgnode and org helpers to store file&line of all org events during
    reading.
 ** TODO Remember the "context" event within calendar.                   :CAL:
+** TODO Implement a "note" command.                                     :ORG:
 
 * Old command ideas
   #+begin_src yaml
