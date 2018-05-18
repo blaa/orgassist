@@ -150,7 +150,9 @@ class Calendar:
             assert self.agenda_path is not None
             with open(self.agenda_path, 'r') as handle:
                 content = handle.read()
-        template = jinja2.Template(content)
+        template = jinja2.Template(content,
+                                   trim_blocks=True,
+                                   lstrip_blocks=True)
 
         since = relative_to.replace(hour=0, minute=0)
         if (relative_to - since).total_seconds() < 4*60*60:
