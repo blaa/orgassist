@@ -92,8 +92,11 @@ def register_plugins(cfg):
 
 def setup(args):
     "Setup logging"
-
-    cfg = Config.from_file(args.config)
+    try:
+        cfg = Config.from_file(args.config)
+    except FileNotFoundError:
+        print("Unable to read config file:", args.config)
+        return None
     setup_logging(cfg)
     register_plugins(cfg)
 
@@ -145,6 +148,8 @@ def main():
 
     try:
         program = setup(args)
+        if program is None:
+            return 4
     except ConfigError as ex:
         print("Error while parsing your configuration file:")
         print(ex.args[0])

@@ -1,11 +1,13 @@
 #+TITLE: OrgAssist project management
 
 * Bugs
-** TODO Show '--now--' marker after all the appointments
-** TODO Show nice info when config file can't be found
 ** TODO Make sleekxmpp work over socks proxy or over tunneled port
    Currently tunneled port breaks TLS domain checking.
    Certificate is for SRV record, not for JID domain.
+** DONE Show nice info when config file can't be found
+   CLOSED: [2018-06-02 Sat 19:17]
+** DONE Show '--now--' marker after all the appointments
+   CLOSED: [2018-06-02 Sat 19:15]
 
 * Features
 ** Localization
