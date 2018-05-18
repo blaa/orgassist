@@ -1,37 +1,111 @@
 #+TITLE: OrgAssist project management
 
-* Tasks
+* Bugs
+** TODO Show '--now--' marker after all the appointments
 ** TODO Show nice info when config file can't be found
+** TODO Make sleekxmpp work over socks proxy or over tunneled port
+   Currently tunneled port breaks TLS domain checking.
+   Certificate is for SRV record, not for JID domain.
 
-** DONE Fill calendar state with events from org-mode
-   CLOSED: [2018-05-30 Wed 18:47]
-** DONE Handle agenda generation from events in the calendar
-   CLOSED: [2018-05-30 Wed 18:48]
-   - Note taken on [2018-05-30 Wed 18:48] \\
-     Works, but agenda format needs many fixes.
-** DONE Handle notifications in the calendar without loosing state on data change
-   CLOSED: [2018-05-31 Thu 17:12]
-** TODO Improve the agenda template.                                    :CAL:
-** TODO Deploy a home-instance 
-** TODO Deploy a work-instance.
-** TODO OWA plugin: Gather events from OWA calendar                     :OWA:
+* Features
+** Localization
+*** TODO Easily switch jinja templates
+    Possibly - use gettext within Jinja templates.
+*** TODO Use gettext for short messages.
+** TODO Implement a "note" command.                                     :ORG:
+   - Start by appending a jinja template to inbox file.
+** Improve Agenda                                                       :CAL:
+*** TODO Show tasks "planned" for today.
+*** TODO Show stats of tasks over the horizon
+*** TODO Display optionally tags in agenda view
+*** TODO Display deadline/scheduled state
+** TODO Add a "search" command                                          :CAL:
+   - Search through all events in the calendar.
+   - Narrow down in consecutive queries, helm-like.
+** TODO Implement a check for never-read config variables.
 ** TODO Implement a shell "execute" plugin
-** TODO Inform user life about agenda changes                           :CAL:
+   Avoid shell-expansions etc. Try to keep it safe.
+** TODO Notify user life about agenda changes                           :CAL:
    - someone created new event
    - removed one (or changed status)
    - rescheduled to different hour
-** TODO Implement a check for never-read config variables.
-** TODO Handle open states correctly in event creation                  :ORG:
-   Pass list of states from config.
-** TODO When notyfing try to group messages                             :CAL:
-   or maybe always show also "next after that" event?
-** TODO Make sure all important stuff gets log.info(). 
+** TODO OWA plugin: Gather events from OWA calendar                     :OWA:
+** TODO Handle a "private" tag                                          :ORG:
+   - Hide headlines of private tags
+** TODO Implement a generic "help" command
+   - Print all available commands with their aliases
+   - Short description of each command.
+
+* Tasks
+** TODO Settle on a name.
+   - orgassist is not completely unique name.
+   - I'm trying to use gender neutral names.
+   - http://www.thesaurus.com/browse/assistant
+     orgally? orgmate?
+     botally, botmate seem taken
+   - "orgremote" is technical, but unique.
+   - "orgbot" is taken, but seems to be a dead repo.
+
+** TODO Deploy a work-instance.
+** TODO Make sure all important stuff gets log.info().
+   - Note taken on [2018-06-02 Sat 11:24] \\
+     In progress; started converting old prints() and adding logging.
    For answers like "why didn't I get that important notification"
 ** TODO Store information about org events source                       :ORG:
    Alter orgnode and org helpers to store file&line of all org events during
    reading.
 ** TODO Remember the "context" event within calendar.                   :CAL:
-** TODO Implement a "note" command.                                     :ORG:
+** TODO Implement a simple library for low-impact edition of org files. :ORG:
+   - No required IDs.
+   - Change only those lines that need changing.
+   - Handle state change.
+   - Handle date updates: moving scheduled, deadline, other dates.
+** TODO Run CI on travis.
+** TODO Create functions for human readable date printing
+   - in 2 days, in 2 hours, 2 days ago, etc.
+   - for scheduling: 2d, 2h, 1w2d.
+
+* Half-baked ideas
+** Communication plugins
+*** Facebook messenger bot
+    email/password approach:
+    https://github.com/carpedm20/fbchat
+*** IRC plugin
+    - Watchout for spoofing: Detect boss by it's address, not only a nickname.
+**** Choose a library
+     - SASL support
+     - TLS support
+
+     http://python-irclib.sourceforge.net/
+
+     uses it's own irc.py:
+     https://github.com/rmmh/skybot/blob/master/core/irc.py
+     https://github.com/sbp/phenny
+
+*** REST interface
+    - Use API key to identify boss?
+
+** When notyfing try to group messages                                  :CAL:
+   or maybe always show also "next after that" event?
+** Integrate with home automation
+   Like: https://github.com/home-assistant/home-assistant
+** Weather plugin: based on wttr.in or direct weather source.
+   https://github.com/chubin/wttr.in
+   #+begin_src
+   $ curl 'wttr.in/warsaw?0&q&T&lang=en'
+   Warsaw, Poland
+
+        \   /     Sunny
+         .-.      22-25 °C
+      ― (   ) ―   ← 7 km/h
+         `-’      10 km
+        /   \     0.4 mm
+   #+end_src
+** Do a RNN natural-language talking bot.
+   Pheh. Certainly doable, but makes sense only to let other people talk to your
+   bot and schedule an appointment with you without using "commands". Kind of
+   obvious idea, requires a lot of data to train the network. I'm not interested
+   currently in pursuing it.
 
 * Old command ideas
   #+begin_src yaml
@@ -59,5 +133,19 @@
       - clockout
   #+end_src
 
-
-
+* Closed / Archive
+** DONE Handle open states correctly in event creation                  :ORG:
+   CLOSED: [2018-06-02 Sat 11:24]
+   Pass list of states from config.
+** DONE Deploy a home-instance
+   CLOSED: [2018-06-02 Sat 11:22]
+** DONE Improve the agenda template.                                    :CAL:
+   CLOSED: [2018-06-02 Sat 11:22]
+** DONE Handle notifications in the calendar without loosing state on data change
+   CLOSED: [2018-05-31 Thu 17:12]
+** DONE Handle agenda generation from events in the calendar
+   CLOSED: [2018-05-30 Wed 18:48]
+   - Note taken on [2018-05-30 Wed 18:48] \\
+     Works, but agenda format needs many fixes.
+** DONE Fill calendar state with events from org-mode
+   CLOSED: [2018-05-30 Wed 18:47]
