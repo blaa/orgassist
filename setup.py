@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION=(0, 1, 0)
+VERSION=(0, 1, 1)
 
 with open("README.md", "r") as handler:
     long_desc = handler.read()
@@ -16,7 +16,8 @@ setuptools.setup(
     url="https://github.com/blaa/orgassist",
     keywords="org-mode emacs bot xmpp planner",
     scripts=['assist.py'],
-    packages=['orgassist'],
+    data_files=['config.tmpl.yml'],
+    packages=setuptools.find_packages(),
     install_requires=[
         'PyYAML==3.12',
         'dnspython==1.15.0',
