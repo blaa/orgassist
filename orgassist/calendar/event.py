@@ -2,6 +2,8 @@
 Abstract events away from the org plugin so they can be used in other
 modules and "agenda" handling can be shared.
 """
+import datetime as dt
+import jinja2
 
 class EventState:
     """
@@ -42,8 +44,7 @@ class Event:
     """
     Abstracts a calendar event from plugins.
     """
-    def __init__(self, headline, state=None,
-                 open_states={"TODO"}):
+    def __init__(self, headline, state=None):
         """Initialize event variables"""
 
         self.headline = headline
@@ -105,14 +106,62 @@ class Event:
         self.tags.update(tags)
         return self
 
+    def format_notice(self, template_content):
+        """
+        Render a notice about this event using given template.
+
+        If you are authoring a plugin which has weird additional metadata you
+        can override this method.
+        """
+        # Jinja context
+        now = dt.datetime.now()
+
+        # Calculate time delta in conscise human-readable way
+        delta_s = (self.relevant_date.sort_date - now).total_seconds()
+
+        delta_h = delta_s // 60 // 60
+        delta_s -= delta_h * 60 * 60
+
+        delta_m = delta_s // 60
+        delta_s -= delta_m * 60
+
+        # If scheduler gets late 10 seconds - round the number.
+        if delta_s > 50:
+            delta_m += 1
+            delta_s = 0
+
+        delta_str = '%dh' % delta_h if delta_h > 0 else ''
+        delta_str += '%dm' % delta_m if delta_m > 0 or delta_h > 0 else ''
+
+        ctx = {
+            'now': now,
+            'event': self,
+            'delta_str': delta_str,
+
+            # Shortcuts
+            'headline': self.headline,
+            'relevant_date': self.relevant_date,
+            'date': self.relevant_date.sort_date,
+            # To differentiate template based on event subclasses
+            'event_cls': self.__class__.__name__,
+        }
+
+        if template_content is None:
+            return ctx
+
+        template = jinja2.Template(template_content)
+        rendered = template.render(ctx)
+
+        return rendered
+
     def __repr__(self):
         "Useful debugging representation"
         add_up = [
             field if isinstance(field, str) else repr(field)
             for field in [
-                "'" + self.headline[:10] + "'",
+                "'" + self.headline[:20] + "'",
                 self.priority,
-                self.state,
+                'state=' + self.state.name,
                 self.relevant_date,
                 ','.join(self.tags),
             ]

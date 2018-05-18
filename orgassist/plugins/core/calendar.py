@@ -5,6 +5,7 @@ Glue between a calendar and other plugins and bot commands.
 import os
 import datetime as dt
 import traceback as tb
+import schedule
 
 from orgassist import log
 from orgassist.config import ConfigError
@@ -15,16 +16,31 @@ from orgassist.calendar import Calendar
 class CalendarCore(AssistantPlugin):
 
     def initialize(self):
-        # Initialize schedulers
-        scan_interval = 120
-        self.scheduler.every(scan_interval).seconds.do(self.schedule_notifications)
+        # Scan calendar periodically and schedule notifications
+        self.scheduler.every(self.scan_interval).seconds.do(self.schedule_notifications)
+
+        # At certain points of day remind boss about agenda.
         for time in self.agenda_times:
             self.scheduler.every().day.at(time).do(self.send_agenda)
 
-        # Incoming notifications
-        self.notify_dedups = []
-        for time in self.agenda_times:
-            delta = dt.timedelta(minutes=time)
+        # When scheduling notifications, store time of last scheduled event so
+        # it won't be scheduled again. Do it separately for each
+        self.notify_positions = {
+            delta: dt.datetime.now() + dt.timedelta(minutes=delta)
+            for delta in self.notify_periods
+        }
+
+    def send_notice(self, event):
+        "Notify user in advance about incoming event."
+        # Read just-in-time so it can be updated without restarting.
+        with open(self.notice_path) as handle:
+            template_content = handle.read()
+        notice = event.format_notice(template_content)
+
+        self.assistant.tell_boss(notice)
+
+        # Do it always once only.
+        return schedule.CancelJob
 
     def schedule_notifications(self):
         "Schedule incoming notifications"
@@ -33,20 +49,56 @@ class CalendarCore(AssistantPlugin):
         # not miss any notifications. At the same time calendar may get updated,
         # tasks added or removed. We can't send duplicates.
 
-        # Prepare notification 5 minutes before it happens
-        prepare_before = 5
+        # Prepare incoming notifications up to 5 minutes before
+        window_size = 5
 
         now = dt.datetime.now()
 
-        # Build an incoming list of stuff that WILL get notifications
+        # FIXME: EXPERIMENT
+        # from orgassist.calendar import Event, EventDate, DateType
+        # event = Event("This is a test event. Remove me", state="TODO")
+        # sched_date = EventDate(now + dt.timedelta(minutes=20), DateType.SCHEDULED)
+        # event.add_date(sched_date)
+        # self.scheduler.every(5).seconds.do(self.send_notice, event)
 
-        log.info('Would schedule notifications!')
+        print("Scheduling notifications")
+        for notify_period in self.notify_periods:
+            # Calculate window
+            wnd_start = now + dt.timedelta(minutes=notify_period)
+            wnd_end = wnd_start + dt.timedelta(minutes=window_size)
+            wnd_start = max(wnd_start, self.notify_positions[notify_period])
+            print(notify_period, wnd_start, '--', wnd_end, 'last:',
+                  self.notify_positions[notify_period])
+            last_scheduled = wnd_start
+            for event in self.calendar.events:
+                date = event.relevant_date.sort_date
+                # We want to schedule an event if it lies between now+notify_period and
+                # now+notify_period+prepare_before
+
+                if not event.relevant_date.appointment:
+                    continue
+
+                if date <= wnd_start:
+                    continue
+                if date > wnd_end:
+                    continue
+
+                log.info("Scheduling %dm notification for event %r", notify_period, event)
+                delta = (date - dt.datetime.now()).total_seconds() - notify_period * 60
+                self.scheduler.every(delta).seconds.do(self.send_notice, event)
+                last_scheduled = max(last_scheduled, date)
+
+            self.notify_positions[notify_period] = last_scheduled
+
 
     def validate_config(self):
         "Read config and apply defaults"
         cfg = self.config
-        self.notify_before = cfg.get('notify_before_m',
-                                     default=[5, 20])
+        self.notify_periods = cfg.get('notify_period',
+                                      default=[5, 20])
+
+        self.scan_interval = cfg.get('scan_interval',
+                                     default=120)
 
         self.agenda_times = cfg.get('agenda.times',
                                     default=['7:00', '12:00'])
@@ -59,22 +111,30 @@ class CalendarCore(AssistantPlugin):
         self.horizon_incoming = cfg.get('agenda.horizon_incoming',
                                         default=720)
 
+        # Get template paths or calculate defaults
         self.agenda_path = cfg.get_path('agenda.agenda_template_path',
                                         required=False)
-        if not self.agenda_path:
-            print("No path in config file")
-            path = os.path.dirname(os.path.abspath(__file__))
-            self.agenda_path = os.path.join(path,
-                                            'templates',
-                                            'agenda.txt.j2')
 
-        try:
-            print("Trying agenda:", self.agenda_path)
-            with open(self.agenda_path):
-                pass
-        except IOError:
-            raise ConfigError('Unable to open agenda template file: ' +
-                              self.agenda_path)
+        self.notice_path = cfg.get_path('agenda.notice_template_path',
+                                        required=False)
+
+        def set_tmpl(filename):
+            "Compute template path and check existance"
+            base_path = os.path.dirname(os.path.abspath(__file__))
+            base_path = os.path.join(base_path, 'templates')
+            path = os.path.join(base_path, filename)
+            try:
+                print("Trying template:", path)
+                with open(path) as handle:
+                    handle.read()
+            except IOError:
+                raise ConfigError('Unable to open template file: ' +
+                                  path)
+            return path
+
+        self.agenda_path = set_tmpl(self.agenda_path or 'agenda.txt.j2')
+        self.notice_path = set_tmpl(self.notice_path or 'notice.txt.j2')
+
 
     def register(self):
 

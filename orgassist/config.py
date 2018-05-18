@@ -52,7 +52,7 @@ class Config:
                     return default
 
         if key_split[-1] not in current:
-            if required is True:
+            if required is True and default is None:
                 msg = "Required config key '%s' not found"
                 raise ConfigError(msg % self._key_desc(key))
             else:

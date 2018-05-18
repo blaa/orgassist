@@ -40,7 +40,7 @@ assistants:
       # A common calendar/agenda plugin - dependency of org.
       calendar:
         # Number of minutes to notify before event happens
-        notify_before_m:
+        notify_period:
           - 30
           - 10
 
@@ -56,6 +56,7 @@ assistants:
 
           # Use default, or one given at path
           #agenda_template_path: '~/.org/agenda.txt.j2'
+          #notice_template_path: '~/.org/notice.txt.j2'
 
       org:
         # Path to handled ORG directory
