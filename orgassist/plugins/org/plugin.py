@@ -39,11 +39,12 @@ class OrgPlugin(AssistantPlugin):
 
         self.state['calendar'].del_events('org')
         self.state['calendar'].add_events(events, 'org')
-
+        return events
 
     def register(self):
         commands = [
-            (['note', 'no'], self.handle_note),
+            (['org:note', 'note', 'no'], self.handle_note),
+            (['org:refresh'], self.handle_refresh),
         ]
         for aliases, callback in commands:
             self.assistant.register_command(aliases, callback)
@@ -87,3 +88,8 @@ class OrgPlugin(AssistantPlugin):
     def handle_note(self, message):
         "Take a note"
         pass
+
+    def handle_refresh(self, message):
+        "Handle refresh request"
+        events = self.refresh_db()
+        message.respond("Loaded %d events" % len(events))

@@ -1,13 +1,26 @@
-
-{% if incoming -%}
-You have following appointments {{ today.strftime("%Y-%m-%d")}}:
-{%- for event  in incoming %}
-  At {{event.relevant_date.date.strftime("%H:%M") }}: {{ event.headline }}
-{%- endfor -%}
-{%- endif %}
-{% if unfinished %}
-You have unfinished tasks:
-{%- for event in unfinished %}
-  {{event.state.name }}: {{ event.headline }}
-{%- endfor %}
-{% endif %}
+{% set ns = namespace(past_now=False) %}
+{%- if appointments -%}
+  {%- set ns.day = None -%}
+  {%- for event in appointments -%}
+    {%- if ns.day != event.relevant_date.sort_date.date() -%}
+      {{"Appointments on " +
+        event.relevant_date.sort_date.strftime("%Y-%m-%d:\n")}}
+      {%- set ns.day = event.relevant_date.sort_date.date() -%}
+    {%- endif -%}
+    {%- if ns.past_now == False and event.relevant_date.sort_date > now -%}
+      {{"-- now --\n"}}
+      {%- set ns.past_now = True -%}
+    {%- endif -%}
+    {{"  At " + event.relevant_date.date.strftime("%H:%M") }}
+    {%- if event.relevant_date.date_end -%}
+    {{" - " + event.relevant_date.date_end.strftime("%H:%M") }}
+    {%- endif -%}
+    {{": %s\n" % event.headline }}
+  {%- endfor -%}
+{%- endif -%}
+{%- if unfinished -%}
+  {{ "Your unfinished tasks:\n" }}
+  {%- for event in unfinished -%}
+  {{"  %s: %s\n" % (event.state.name, event.headline) }}
+  {%- endfor -%}
+{%- endif -%}

@@ -84,36 +84,32 @@ class Calendar:
             unfinished.append(event)
         return unfinished
 
-    def get_incoming(self, horizon, relative_to=None):
+    def get_appointments(self, since, horizon):
         "Get a list of scheduled and planned events"
-        incoming = []
-        if relative_to is None:
-            relative_to = dt.datetime.now()
+        appointments = []
 
-        print("GET INCOMING")
-        incoming = []
+        print("GET APPOINTMENTS")
+        appointments = []
         for event in self.events:
+            # Include only appointments
+            if not event.relevant_date.appointment:
+                continue
+
             date = event.relevant_date.sort_date
             print("  ", event)
-            if date < relative_to:
+            if date < since:
                 print("    IN PAST")
                 continue
             if date > horizon:
                 print("    OVER HORIZON")
                 break
 
-            # State doesn't matter as long as the date is accurate
-            if not event.relevant_date.appointment:
-                continue
-
             print("  GOT YOU")
-            incoming.append(event)
-        return incoming
+            appointments.append(event)
+        return appointments
 
     def get_scheduled(self, horizon, relative_to=None):
         "Get tasks scheduled or deadlining in given period"
-        if relative_to is None:
-            relative_to = dt.datetime.now()
 
         print("GET SCHEDULED")
         scheduled = []
@@ -139,6 +135,8 @@ class Calendar:
     def get_agenda(self, horizon_incoming, horizon_unfinished,
                    list_unfinished_appointments, relative_to=None):
         "Generate agenda in a text format"
+        if relative_to is None:
+            relative_to = dt.datetime.now()
 
         log.info("Getting agenda from %r to %r",
                  horizon_unfinished, horizon_incoming)
@@ -154,12 +152,19 @@ class Calendar:
                 content = handle.read()
         template = jinja2.Template(content)
 
+        since = relative_to.replace(hour=0, minute=0)
+        if (relative_to - since).total_seconds() < 4*60*60:
+            # Include more past
+            since -= dt.timedelta(hours=4)
+
         ctx = {
             'unfinished': self.get_unfinished(horizon_unfinished,
                                               list_unfinished_appointments,
                                               relative_to),
-            'incoming': self.get_incoming(horizon_incoming, relative_to),
-            'today': relative_to,
+            # Incoming - from the whole day
+            'appointments': self.get_appointments(since=since,
+                                                  horizon=horizon_incoming),
+            'now': relative_to,
         }
 
         return template.render(ctx)
