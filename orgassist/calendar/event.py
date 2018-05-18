@@ -161,7 +161,7 @@ class Event:
             for field in [
                 "'" + self.headline[:20] + "'",
                 self.priority,
-                'state=' + self.state.name,
+                ('state=' + self.state.name) if self.state is not None else '',
                 self.relevant_date,
                 ','.join(self.tags),
             ]

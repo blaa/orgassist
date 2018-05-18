@@ -6,7 +6,7 @@ You have following appointments {{ today.strftime("%Y-%m-%d")}}:
 {%- endfor %}
 {%- endif %}
 {% if unfinished %}
-And you haven't finished following:
+You have unfinished tasks:
 {%- for event  in unfinished %}
   {{event.state.name }}: {{ event.headline }}
 {%- endfor %}

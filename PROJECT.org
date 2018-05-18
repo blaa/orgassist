@@ -1,0 +1,60 @@
+#+TITLE: OrgAssist project management
+
+* Tasks
+** DONE Fill calendar state with events from org-mode
+   CLOSED: [2018-05-30 Wed 18:47]
+** DONE Handle agenda generation from events in the calendar
+   CLOSED: [2018-05-30 Wed 18:48]
+   - Note taken on [2018-05-30 Wed 18:48] \\
+     Works, but agenda format needs many fixes.
+** DONE Handle notifications in the calendar without loosing state on data change
+   CLOSED: [2018-05-31 Thu 17:12]
+** TODO Improve the agenda template.                                    :CAL:
+** TODO Deploy a home-instance 
+** TODO Deploy a work-instance.
+** TODO OWA plugin: Gather events from OWA calendar                     :OWA:
+** TODO Implement a shell "execute" plugin
+** TODO Inform user life about agenda changes                           :CAL:
+   - someone created new event
+   - removed one (or changed status)
+   - rescheduled to different hour
+** TODO Implement a check for never-read config variables.
+** TODO Handle open states correctly in event creation                  :ORG:
+   Pass list of states from config.
+** TODO When notyfing try to group messages                             :CAL:
+   or maybe always show also "next after that" event?
+** TODO Make sure all important stuff gets log.info(). 
+   For answers like "why didn't I get that important notification"
+** TODO Store information about org events source                       :ORG:
+   Alter orgnode and org helpers to store file&line of all org events during
+   reading.
+** TODO Remember the "context" event within calendar.                   :CAL:
+
+* Old command ideas
+  #+begin_src yaml
+  defaults:
+    enable_commands:
+      # Send current agenda
+      - agenda
+      # What should I do next? (displays and selects the task)
+      - next
+      # Select one of the tasks to perform an action on it.
+      - select
+      # Remind me what am I supposed to be doing?
+      - now
+      # Mark selected task as done
+      - done
+      # status [done|todo|delegated] - set status
+      - status
+      # Take a fast note; it gets selected afterwards
+      - note
+      # Reschedule selected note (+1d, +1w, YYYY-MM-DD HH:MM)
+      - schedule
+      # Count me time on selected task
+      - clockin
+      # Clock me out
+      - clockout
+  #+end_src
+
+
+

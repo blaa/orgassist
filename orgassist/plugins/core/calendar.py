@@ -98,7 +98,7 @@ class CalendarCore(AssistantPlugin):
                                       default=[5, 20])
 
         self.scan_interval = cfg.get('scan_interval',
-                                     default=120)
+                                     default=60)
 
         self.agenda_times = cfg.get('agenda.times',
                                     default=['7:00', '12:00'])

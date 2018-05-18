@@ -145,9 +145,7 @@ class Calendar:
             'incoming': self.get_incoming(horizon_incoming, relative_to),
             'today': relative_to,
         }
-        print("GOT TEMPLATE:", content)
 
-        log.info("%r", ctx)
         return template.render(ctx)
 
     def __repr__(self):
