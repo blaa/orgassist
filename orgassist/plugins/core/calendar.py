@@ -133,7 +133,7 @@ class CalendarCore(AssistantPlugin):
             (['agenda', 'ag'], self.handle_agenda),
         ]
         for aliases, callback in commands:
-            self.assistant.register_command(aliases, callback)
+            self.assistant.command.register(aliases, callback)
 
     def handle_agenda(self, message):
         "Respond with an agenda on agenda command"

@@ -1,13 +1,13 @@
-from orgassist.config import ConfigError
-from orgassist import log, templates
-from orgassist import helpers
-
 """
 Assistant class and assistant plugin interfaceo
 """
 
-class PluginError(Exception):
-    "Raised when plugin causes an error"
+from orgassist import log
+from orgassist.config import ConfigError
+from orgassist import helpers
+
+from orgassist.assistant import CommandDispatch
+
 
 class Assistant:
     """
@@ -26,6 +26,9 @@ class Assistant:
         self.scheduler = scheduler
         self.config = config
 
+        # Command dispatcher.
+        self.command = CommandDispatch(self)
+
         # Time-related helpers
         self.time = helpers.Time()
 
@@ -34,12 +37,6 @@ class Assistant:
 
         # Global assistant state to let plugins cooperate
         self.state = {}
-
-        # TODO: Refactor command parser out of assistant class.
-        # Commands registered by plugins for dispatching
-        # {command1: callback1, command2: callback1,
-        #  command3: callback2 }
-        self.commands = {}
 
         # List of callbacks to call boss when initiating communication
         self.boss_channels = []
@@ -86,7 +83,7 @@ class Assistant:
 
             # Incoming channel
             bot.add_dispatch(jid, resource,
-                             self.handle_message)
+                             self.command.dispatch)
 
             # Outgoing channel
             def create_closure(jid, resource):
@@ -105,34 +102,6 @@ class Assistant:
     def register_irc_bot(self, bot):
         "Register dispatch in an IRC bot"
         raise NotImplementedError
-
-    def register_command(self, names, callback):
-        "Register command dispatch"
-        # TODO: Handle regular expressions as names
-        if isinstance(names, str):
-            names = [names]
-        for name in names:
-            name = name.lower().strip()
-            if name in self.commands:
-                raise PluginError("Command '%s' was already registered." % name)
-            if ' ' in name:
-                raise PluginError("Commands ('%s') can't have spaces within." % name)
-
-            self.commands[name] = callback
-
-    def handle_message(self, message):
-        """
-        Handle command sent by the Boss.
-        """
-        command_raw = message.text.split()[0]
-        command = command_raw.lower().strip()
-        handler = self.commands.get(command, None)
-        if handler is not None:
-            # Prepare a message without a command.
-            message.strip_command(command_raw)
-            handler(message)
-        else:
-            message.respond(templates.get('DONT_UNDERSTAND'))
 
     def tell_boss(self, message):
         """
@@ -154,50 +123,3 @@ class Assistant:
             cls.registered_plugins[name] = plugin_cls
             return plugin_cls
         return decorator
-
-
-class AssistantPlugin:
-    """
-    Handles some data state (eg. org-mode directory),
-    configures scheduler and may initiate communication.
-
-    for_all[validate_config -> register] -> for_all[initialize]
-    """
-
-    def __init__(self, assistant, config, scheduler, time, state):
-        """
-        Args:
-          assistant: Connected assistant object
-          config: Part of config which is relevant to the plugin
-          scheduler: Common scheduler which gets executed in the main loop
-          state: a state shared between the plugins.
-          time: time helpers
-        """
-        self.config = config
-        self.scheduler = scheduler
-        self.assistant = assistant
-        self.time = time
-        self.state = state
-
-    def register(self):
-        """
-        Register commands and other callbacks.
-
-        Called first, before all plugins are created.
-        """
-        raise NotImplementedError
-
-    def initialize(self):
-        """
-        Called once at the beginning to initialize - so implementors can leave
-        __init__ alone. All plugins are registered when this method is called.
-        """
-        raise NotImplementedError
-
-    def validate_config(self):
-        """
-        Validate configuration, raise ConfigError on problems.
-
-        Touch all valid config options here, so that Config class can report
-        what config keys were ignored (and are, for example, mistyped).
-        """

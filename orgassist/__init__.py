@@ -6,7 +6,10 @@ log = logging.getLogger('orgassist')
 from . import config
 from . import calendar
 from . import bots
-from . import assistant
+
+from .assistant import PluginError
+from .assistant import Assistant, AssistantPlugin
+
 
 # Register commands
 from . import plugins

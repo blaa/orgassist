@@ -4,6 +4,11 @@
 ** TODO Make sleekxmpp work over socks proxy or over tunneled port
    Currently tunneled port breaks TLS domain checking.
    Certificate is for SRV record, not for JID domain.
+
+   Update: I lacked pyasn1 on one server and it didn't verify cert there at all.
+   Where: sleekxmpp: cert.py / verify() 
+   gets expected from jid. tries to get srv from cert (but doesn't; and can it?)
+   Maybe my cert is bad but pidgin likes it.
 ** DONE Show nice info when config file can't be found
    CLOSED: [2018-06-02 Sat 19:17]
 ** DONE Show '--now--' marker after all the appointments
@@ -14,9 +19,6 @@
 *** TODO Easily switch jinja templates
     Possibly - use gettext within Jinja templates.
 *** TODO Use gettext for short messages.
-** DONE Implement a "note" command.                                     :ORG:
-   CLOSED: [2018-06-03 Sun 22:58]
-   - Start by appending a jinja template to inbox file.
 ** Improve Agenda                                                       :CAL:
 *** TODO Show tasks "planned" for today.
 *** TODO Show stats of tasks over the horizon
@@ -25,6 +27,7 @@
 ** TODO Add a "search" command                                          :CAL:
    - Search through all events in the calendar.
    - Narrow down in consecutive queries, helm-like.
+   - Remember last search for X minutes.
 ** TODO Implement a shell "execute" plugin
    Avoid shell-expansions etc. Try to keep it safe.
 ** TODO Notify user life about agenda changes                           :CAL:
@@ -37,6 +40,13 @@
 ** TODO Implement a generic "help" command
    - Print all available commands with their aliases
    - Short description of each command.
+** TODO Handle dates in "note" command in smart way
+   detect date:
+   2018-08-10
+   mm-dd (this or next months in this year)
+   mon, tue, wed, thu, fri, sat, sun (next)
+   hh:mm - hour, minute
+   And schedule using given date (or treat as appointment?)
 
 * Tasks
 ** TODO Settle on a name.
@@ -55,7 +65,7 @@
    For answers like "why didn't I get that important notification"
 ** TODO Store information about org events source                       :ORG:
    Alter orgnode and org helpers to store file&line of all org events during
-   reading.
+   reading. Keep a start line and a last line of event.
 ** TODO Remember the "context" event within calendar.                   :CAL:
 ** TODO Implement a simple library for low-impact edition of org files. :ORG:
    - No required IDs.
@@ -146,6 +156,9 @@
   #+end_src
 
 * Closed / Archive
+** DONE Implement a "note" command.                                     :ORG:
+   CLOSED: [2018-06-03 Sun 22:58]
+   - Start by appending a jinja template to inbox file.
 ** DONE Implement a check for never-read config variables.
    CLOSED: [2018-06-03 Sun 16:04]
 ** DONE Handle open states correctly in event creation                  :ORG:

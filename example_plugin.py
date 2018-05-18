@@ -39,7 +39,7 @@ class OwaPlugin(AssistantPlugin):
             (['owa_refresh'], self.handle_refresh),
         ]
         for aliases, callback in commands:
-            self.assistant.register_command(aliases, callback)
+            self.assistant.command.register(aliases, callback)
 
     def initialize(self):
         """

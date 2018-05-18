@@ -49,7 +49,7 @@ class OrgPlugin(AssistantPlugin):
             (['refresh'], self.handle_refresh),
         ]
         for aliases, callback in commands:
-            self.assistant.register_command(aliases, callback)
+            self.assistant.command.register(aliases, callback)
 
     def initialize(self):
         "Initialize org plugin, read database and schedule updates"
@@ -164,7 +164,7 @@ class OrgPlugin(AssistantPlugin):
             'headline': message.text,
             'sender': message.sender,
             'schedule': schedule,
-            'tag': ':' + self.note_tag + ':',
+            'tag': ':' + self.note_tag + ':' if self.note_tag else None
         }
         snippet = template.render(ctx)
 

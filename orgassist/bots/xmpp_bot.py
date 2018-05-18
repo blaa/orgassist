@@ -2,7 +2,7 @@
 from sleekxmpp import ClientXMPP
 from sleekxmpp.thirdparty import socks
 
-from orgassist import templates
+from orgassist.helpers import language
 from . import Message
 from . import log
 
@@ -97,7 +97,7 @@ class XmppBot:
 
         # If unknown - ignore
         if callback is None:
-            respond(templates.get('DONT_KNOW'))
+            respond(language.get('DONT_KNOW'))
             return
 
         # Construct a Message using bot-generic API
