@@ -6,6 +6,7 @@ import datetime as dt
 import jinja2
 
 from orgassist import log
+from orgassist.calendar import DateType
 
 class Calendar:
     """
@@ -41,12 +42,16 @@ class Calendar:
                 if event.meta['calendar_tag'] != internal_tag
             ]
 
-    def get_unfinished(self, horizon, relative_to=None):
+    def get_unfinished(self, horizon,
+                       list_unfinished_appointments,
+                       relative_to=None):
         """
         Get a list of past unfinished events
 
         Args:
           horizon (datetime): The oldest date to consider.
+          relative_to (datetime): The relative "now" time.
+          list_unfinished_appointments (bool): Return all open or just scheduled.
         """
         if relative_to is None:
             relative_to = dt.datetime.now()
@@ -59,9 +64,18 @@ class Calendar:
             if date < horizon:
                 print("  BEFORE HORIZON")
                 continue
-            if event.state is not None and not event.state.is_open:
+            if event.state is None:
+                print("  NO STATE, SO NOT AN OPEN STATE")
+                continue
+            if not event.state.is_open:
                 print("  NOT OPEN STATE")
                 continue
+            if list_unfinished_appointments is False:
+                print("  CHECK IF APP", event.date_types)
+                if (DateType.SCHEDULED not in event.date_types and
+                    DateType.DEADLINE not in event.date_types):
+                    print("  NOT SCHEDULED")
+                    continue
             if date > relative_to:
                 # We are in future - not unfinished.
                 break
@@ -122,7 +136,8 @@ class Calendar:
 
         return scheduled
 
-    def get_agenda(self, horizon_incoming, horizon_unfinished, relative_to=None):
+    def get_agenda(self, horizon_incoming, horizon_unfinished,
+                   list_unfinished_appointments, relative_to=None):
         "Generate agenda in a text format"
 
         log.info("Getting agenda from %r to %r",
@@ -141,6 +156,7 @@ class Calendar:
 
         ctx = {
             'unfinished': self.get_unfinished(horizon_unfinished,
+                                              list_unfinished_appointments,
                                               relative_to),
             'incoming': self.get_incoming(horizon_incoming, relative_to),
             'today': relative_to,

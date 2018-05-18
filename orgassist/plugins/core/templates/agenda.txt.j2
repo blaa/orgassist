@@ -3,11 +3,11 @@
 You have following appointments {{ today.strftime("%Y-%m-%d")}}:
 {%- for event  in incoming %}
   At {{event.relevant_date.date.strftime("%H:%M") }}: {{ event.headline }}
-{%- endfor %}
+{%- endfor -%}
 {%- endif %}
 {% if unfinished %}
 You have unfinished tasks:
-{%- for event  in unfinished %}
+{%- for event in unfinished %}
   {{event.state.name }}: {{ event.headline }}
 {%- endfor %}
 {% endif %}

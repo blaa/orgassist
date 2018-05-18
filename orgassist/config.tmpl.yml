@@ -72,6 +72,9 @@ assistants:
           #agenda_template_path: '~/.org/agenda.txt.j2'
           #notice_template_path: '~/.org/notice.txt.j2'
 
+          # List all Open events, not only scheduled or with deadline
+          list_unfinished_appointments: False
+
       org:
         # Path to handled ORG directory
         directory: ~/.org/
@@ -99,7 +102,7 @@ assistants:
         # Identified statuses/todo states
         todos:
           # Considered 'todo/open'
-          open: ['TODO', 'DELEGATED']
+          open: ['TODO', 'DELEGATED', 'NEXT']
 
           # Todos considered "closed/done"
           closed: ['DONE', 'CANCELLED', 'DEFERRED']

@@ -132,7 +132,7 @@ def main_loop(program):
         # thread and while we are sleeping user might cause action which
         # schedules something.
         idle = min(30, idle)
-        orgassist.log.debug("Scheduler sleeping %d seconds", idle)
+        orgassist.log.debug("Scheduler sleeping %.1f seconds", idle)
         sleep(idle)
         program['scheduler'].run_pending()
 

@@ -109,6 +109,9 @@ class CalendarCore(AssistantPlugin):
         self.horizon_incoming = cfg.get('agenda.horizon_incoming',
                                         default=720)
 
+        self.list_unfinished_appointments = cfg.get('agenda.list_unfinished_appointments',
+                                                    default=False)
+
         # Get template paths or calculate defaults
         self.agenda_path = cfg.get_path('agenda.agenda_template_path',
                                         required=False)
@@ -161,6 +164,7 @@ class CalendarCore(AssistantPlugin):
         try:
             agenda = self.calendar.get_agenda(horizon_incoming,
                                               horizon_unfinished,
+                                              self.list_unfinished_appointments,
                                               relative_to=now)
             return agenda
         except Exception:
