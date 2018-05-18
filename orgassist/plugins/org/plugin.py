@@ -14,7 +14,7 @@ from orgassist import log
 from orgassist.assistant import Assistant, AssistantPlugin
 
 from . import helpers
-
+from orgassist.helpers import get_template
 
 @Assistant.plugin('org')
 class OrgPlugin(AssistantPlugin):
@@ -85,8 +85,13 @@ class OrgPlugin(AssistantPlugin):
             'resilient': False,
         }
 
+        self.note_template_path = self.config.get_path('note_template_path',
+                                                       required=False)
+
+
     def handle_note(self, message):
         "Take a note"
+        template = get_template(self.agenda_path, self.agenda_content)
         pass
 
     def handle_refresh(self, message):

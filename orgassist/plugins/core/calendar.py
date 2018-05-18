@@ -11,6 +11,7 @@ from orgassist import log
 from orgassist.config import ConfigError
 from orgassist.assistant import Assistant, AssistantPlugin
 from orgassist.calendar import Calendar
+from orgassist import helpers
 
 @Assistant.plugin('calendar')
 class CalendarCore(AssistantPlugin):
@@ -33,9 +34,8 @@ class CalendarCore(AssistantPlugin):
     def send_notice(self, event):
         "Notify user in advance about incoming event."
         # Read just-in-time so it can be updated without restarting.
-        with open(self.notice_path) as handle:
-            template_content = handle.read()
-        notice = event.format_notice(template_content)
+        template = helpers.get_template(self.notice_path)
+        notice = event.format_notice(template)
 
         self.assistant.tell_boss(notice)
 
@@ -119,22 +119,8 @@ class CalendarCore(AssistantPlugin):
         self.notice_path = cfg.get_path('agenda.notice_template_path',
                                         required=False)
 
-        def set_tmpl(filename):
-            "Compute template path and check existance"
-            base_path = os.path.dirname(os.path.abspath(__file__))
-            base_path = os.path.join(base_path, 'templates')
-            path = os.path.join(base_path, filename)
-            try:
-                log.debug("Trying template: %s", path)
-                with open(path) as handle:
-                    handle.read()
-            except IOError:
-                raise ConfigError('Unable to open template file: ' +
-                                  path)
-            return path
-
-        self.agenda_path = set_tmpl(self.agenda_path or 'agenda.txt.j2')
-        self.notice_path = set_tmpl(self.notice_path or 'notice.txt.j2')
+        self.agenda_path = helpers.get_default_template(self.agenda_path or 'agenda.txt.j2', __file__)
+        self.notice_path = helpers.get_default_template(self.notice_path or 'notice.txt.j2', __file__)
 
 
     def register(self):

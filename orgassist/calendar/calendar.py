@@ -3,10 +3,11 @@ Org-mode compatible calendar implementation - handles a number of events in
 time.
 """
 import datetime as dt
-import jinja2
+
 
 from orgassist import log
 from orgassist.calendar import DateType
+from orgassist import helpers
 
 class Calendar:
     """
@@ -143,16 +144,7 @@ class Calendar:
 
         # Open and read when needed so the file can be updated
         # without restarting bot.
-        if self.agenda_content is not None:
-            assert self.agenda_path is None
-            content = self.agenda_content
-        else:
-            assert self.agenda_path is not None
-            with open(self.agenda_path, 'r') as handle:
-                content = handle.read()
-        template = jinja2.Template(content,
-                                   trim_blocks=True,
-                                   lstrip_blocks=True)
+        template = helpers.get_template(self.agenda_path, self.agenda_content)
 
         since = relative_to.replace(hour=0, minute=0)
         if (relative_to - since).total_seconds() < 4*60*60:

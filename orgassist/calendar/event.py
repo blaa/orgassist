@@ -106,7 +106,7 @@ class Event:
         self.tags.update(tags)
         return self
 
-    def format_notice(self, template_content):
+    def format_notice(self, template):
         """
         Render a notice about this event using given template.
 
@@ -146,10 +146,9 @@ class Event:
             'event_cls': self.__class__.__name__,
         }
 
-        if template_content is None:
+        if template is None:
             return ctx
 
-        template = jinja2.Template(template_content)
         rendered = template.render(ctx)
 
         return rendered
