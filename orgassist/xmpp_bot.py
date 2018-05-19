@@ -7,7 +7,7 @@ log = logging.getLogger('xmpp-bot')
 
 class XmppBot:
     """
-
+    Interfaces with Jabber and identifies bosses by JID and resource.
     """
 
     def __init__(self, connect_cfg):
@@ -15,8 +15,8 @@ class XmppBot:
         # (Sender JID, [local resource]) -> callback
         self.dispatch_map = {}
 
-        self.jid = connect_cfg['jid']
-        self.connect(connect_cfg['password'])
+        self.jid = connect_cfg.jid
+        self.connect(connect_cfg.password)
 
     def connect(self, password):
         "Connect to XMPP server"
@@ -74,12 +74,12 @@ class XmppBot:
         if callback is None:
             respond(templates.get('DONT_KNOW'))
 
-        callback(respond, from_jid.full, msg['body'])
+        callback(msg['body'], from_jid.full, respond)
 
     def send_message(self, jid, message):
         "Send a message"
         self.client.send_message(jid, message)
 
-    def close():
+    def close(self):
         "Disconnect / close threads"
         self.client.abort()
