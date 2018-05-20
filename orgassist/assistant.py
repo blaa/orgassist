@@ -1,4 +1,3 @@
-
 from orgassist import ConfigError
 from orgassist import log, templates
 
@@ -49,6 +48,9 @@ class Assistant:
         #  command3: callback2 }
         self.commands = {}
 
+        # List of callbacks to call boss when initiating communication
+        self.boss_channels = []
+
         self._validate_config()
         self._initialize_plugins()
 
@@ -79,19 +81,41 @@ class Assistant:
     def _validate_config(self):
         "Simple config validation - fail early"
         self.config.get('plugins')
-        self.config.get('boss')
-        self.config.get('boss.jid')
+        self.config.get('channels')
 
     def register_xmpp_bot(self, bot):
         """
         Dispatch to this assistant when a JID talks to bot with given
         resource.
         """
-        boss = self.config.boss
-        bot.add_dispatch(boss.jid, boss.get('resource',
-                                            default=None,
-                                            required=False),
-                         self.handle_message)
+        for channel_cfg in self.config.channels:
+            jid = channel_cfg.get('jid',
+                                  required=False, assert_type=str)
+            resource = channel_cfg.get('resource',
+                                       required=False, assert_type=str)
+            # FUTURE: Calling by name.
+            # name = channel_cfg.get('name', default='boss')
+
+            if not jid:
+                continue
+
+            # Incoming channel
+            bot.add_dispatch(jid, resource,
+                             self.handle_message)
+
+            # Outgoing channel
+            def create_closure(jid, resource):
+                "Create closure containing JID and resource"
+                def out(msg):
+                    "Outgoing channel to the boss"
+                    send_to = jid
+                    if resource is not None:
+                        send_to += '/' + resource
+                    print("OUT TO", send_to)
+                    bot.send_message(send_to, msg)
+                self.boss_channels.append(out)
+
+            create_closure(jid, resource)
 
     def register_irc_bot(self, bot):
         "Register dispatch in an IRC bot"
@@ -114,17 +138,23 @@ class Assistant:
         """
         Handle command sent by the Boss.
         """
-
         command = text.split()[0]
         command = command.lower().strip()
-        print()
-        print("HH", self.commands)
         handler = self.commands.get(command, None)
         if handler is not None:
             message = self.Message(text, sender, respond)
             handler(message)
         else:
             respond(templates.get('DONT_UNDERSTAND'))
+
+    def tell_boss(self, message):
+        """
+        Send message to boss using all registered channels.
+
+        TODO: Allow to specifying priority or best channel.
+        """
+        for channel in self.boss_channels:
+            channel(message)
 
     # Decorator to register context plugins
     @classmethod

@@ -53,15 +53,18 @@ class OrgPlugin(AssistantPlugin):
     """
     Handle operations on an org-mode tree
     """
-
     def refresh_db(self):
         "Refresh/load DB with org entries"
         aggr, _ = load_org(self.config)
         self.state['db'] = aggr
 
-
     def initialize(self):
         self.refresh_db()
+
+        interval = self.config.get('scan_interval_s', assert_type=int)
+        self.scheduler.every(interval).seconds.do(self.refresh_db)
+
+        #self.scheduler.every(10).seconds.do(lambda: self.assistant.tell_boss('You are a bad person.\nTesttest\ntesttest'))
 
     def register(self):
         commands = [
@@ -74,3 +77,8 @@ class OrgPlugin(AssistantPlugin):
         "Respond with an agenda on agenda command"
         message.respond('That is an agenda!')
         message.respond('It works!')
+
+        self.state['db']
+
+
+

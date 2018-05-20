@@ -47,10 +47,11 @@ class XmppBot:
         "Dispatch incoming message depending on the sender"
         print("message dispatch")
         if msg['type'] not in ('chat', 'normal'):
-            log.warn('Unknown message type: %r %r', msg, msg['type'])
+            log.warning('Unknown message type: %r %r', msg, msg['type'])
             return
 
         def respond(response):
+            "Closure to simplify responding"
             self.send_message(msg.get_from(), response)
 
         to_jid = msg.get_to()
@@ -68,8 +69,8 @@ class XmppBot:
 
         if callback is None:
             respond(templates.get('DONT_KNOW'))
-
-        callback(msg['body'], from_jid.full, respond)
+        else:
+            callback(msg['body'], from_jid.full, respond)
 
     def send_message(self, jid, message):
         "Send a message"

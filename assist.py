@@ -80,9 +80,12 @@ def setup():
 def main_loop(program):
     "Main loop - execute scheduled tasks"
     while True:
-        print("Looping", program['assistants'])
         program['scheduler'].run_pending()
-        sleep(5)
+        idle = program['scheduler'].idle_seconds
+        idle = min(30, idle)
+        print("Waiting %d seconds for next task" % idle)
+        sleep(idle)
+        program['scheduler'].run_pending()
 
 
 def main():

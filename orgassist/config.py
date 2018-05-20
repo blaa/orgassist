@@ -63,9 +63,20 @@ class Config:
             msg = "Key '%s' has type %s, but should have type %s"
             raise ConfigError(msg % (self._key_desc(key), type(value), assert_type))
 
-        if isinstance(value, dict) and wrap is True:
-            return Config(value, partial=key)
+        if wrap is True:
+            # Wrap dictionaries
+            if isinstance(value, dict):
+                return Config(value, partial=key)
 
+            # Wrap lists of dictionaries
+            elif isinstance(value, list):
+                if not value:
+                    return value
+                if set(type(el) for el in value) == {dict}:
+                    return [
+                        Config(element, partial='%s[%d]' % (key, i))
+                        for i, element in enumerate(value)
+                    ]
         return value
 
     def get_path(self, key, default=None):
@@ -95,3 +106,6 @@ class Config:
     def __getattr__(self, key):
         "Proxy access to valid fields of config"
         return self.get(key, required=True)
+
+    def __repr__(self):
+        return '<Config partial=%s %r>' % (self._partial, self._data)
