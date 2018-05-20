@@ -1,7 +1,7 @@
 import logging
 from sleekxmpp import ClientXMPP
 
-from . import templates
+from orgassist import templates
 
 log = logging.getLogger('xmpp-bot')
 
@@ -56,11 +56,6 @@ class XmppBot:
         to_jid = msg.get_to()
         from_jid = msg.get_from()
 
-        #to_jid.get_resource()
-        # Destination resource
-        #if '/' in msg.get_to():
-        #    resource = msg.get_to().split('/')[1]
-        #else:
         resource = to_jid.resource
 
         print("----------------------")

@@ -1,7 +1,10 @@
-import functools
 
 from orgassist import ConfigError
 from orgassist import log, templates
+
+"""
+Assistant class and assistant plugin interfaceo
+"""
 
 class PluginError(Exception):
     "Raised when plugin causes an error"
@@ -14,12 +17,14 @@ class Assistant:
     """
     class Message:
         "API to unify all message data in one object"
+
         def __init__(self, text, sender, respond):
             self.text = text
             self.sender = sender
             self._respond = respond
 
         def respond(self, text):
+            "Proxy to respond"
             self._respond(text)
 
     # {'org': OrgContext, 'calendar': CalendarNotifications,
@@ -53,16 +58,21 @@ class Assistant:
         plugins = self.config.get('plugins', assert_type=dict)
 
         for plugin_name, plugin_config in plugins.items():
-
             plugin_cls = Assistant.registered_plugins.get(plugin_name, None)
             if plugin_cls is None:
                 raise ConfigError("Configured plugin '%s' is not registered" %
                                   plugin_name)
 
-            plugin = plugin_cls(self.config, self.scheduler)
+            plugin = plugin_cls(self, plugin_config, self.scheduler)
             plugin.validate_config()
-            plugin.register(self)
+            plugin.register()
             self.plugins[plugin_name] = plugin
+            log.info('Plugin %s instantiated', plugin_name)
+
+        # Initialize plugins
+        for plugin in self.plugins.values():
+            plugin.initialize()
+
 
     def _validate_config(self):
         "Simple config validation - fail early"
@@ -82,6 +92,7 @@ class Assistant:
                          self.handle_message)
 
     def register_irc_bot(self, bot):
+        "Register dispatch in an IRC bot"
         raise NotImplementedError
 
     def register_command(self, names, callback):
@@ -118,6 +129,7 @@ class Assistant:
     def plugin(cls, name):
         "Decorator to register plugins within assistant"
         def decorator(plugin_cls):
+            "Register and return a plugin"
             if name in cls.registered_plugins:
                 raise Exception("Plugin %s already defined" % name)
             cls.registered_plugins[name] = plugin_cls
@@ -130,9 +142,16 @@ class AssistantPlugin:
     Handles some data state (eg. org-mode directory),
     configures scheduler and may initiate communication.
     """
-    def __init__(self, config, scheduler):
+    def __init__(self, assistant, config, scheduler):
         self.config = config
         self.scheduler = scheduler
+        self.assistant = assistant
+
+    def initialize(self):
+        """
+        Called once at the beginning to initialize - so implementors can leave
+        __init__ alone.
+        """
 
     def validate_config(self):
         """
@@ -142,9 +161,7 @@ class AssistantPlugin:
         what config keys were ignored (and are, for example, mistyped).
         """
 
-    def register(self, assistant):
+    def register(self):
         """
         Register commands and other callbacks.
         """
-        self.assistant = assistant
-

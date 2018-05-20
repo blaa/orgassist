@@ -1,5 +1,6 @@
 ENV/
 config.yml
 .#*
+*.pyc
 *~
 __pycache__

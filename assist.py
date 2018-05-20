@@ -8,11 +8,17 @@ import schedule
 import orgassist
 
 def parse_args():
+    "Parse arguments"
     p = argparse.ArgumentParser()
     p.add_argument("--config",
                    help="Path to the YAML config directory",
                    type=str,
                    default="config.yml")
+    p.add_argument("--test",
+                   help="Initialize, but don't start bots",
+                   action="store_true",
+                   default=False)
+
     """
     p.add_argument("--daemon",
                    help="Thread away to the background",
@@ -28,20 +34,20 @@ def setup_logging(cfg):
     level = cfg.get('log.level',
                     required=False,
                     default='INFO')
-    map = {
+    level_map = {
         'INFO': logging.INFO,
         'DEBUG': logging.DEBUG,
         'WARN': logging.WARNING,
         'WARNING': logging.WARNING,
         'ERROR': logging.ERROR,
     }
-    logging.basicConfig(level=map.get(level))
+    logging.basicConfig(level=level_map.get(level))
 
 def setup():
     "Setup logging"
     args = parse_args()
 
-    cfg = orgassist.Config.from_file('config.yml')
+    cfg = orgassist.Config.from_file(args.config)
 
     setup_logging(cfg)
 
@@ -61,12 +67,14 @@ def setup():
 
         s.register_xmpp_bot(xmpp_bot)
         # FUTURE: s.register_irc_bot(irc)
+
         assistants.append(s)
 
     return {
         'xmpp_bot': xmpp_bot,
         'assistants': assistants,
         'scheduler': scheduler,
+        'args': args,
     }
 
 def main_loop(program):
@@ -82,12 +90,16 @@ def main():
 
     try:
         program = setup()
-    except orgassist.ConfigError as e:
+    except orgassist.ConfigError as ex:
         print("Error while parsing your configuration file:")
-        print(e.args[0])
+        print(ex.args[0])
         return
     except KeyboardInterrupt:
         print("Interrupted during initialization")
+        return
+
+    if program['args'].test:
+        # Just test
         return
 
     # Start processing in other threads

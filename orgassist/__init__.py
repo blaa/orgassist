@@ -4,8 +4,10 @@ import logging
 log = logging.getLogger('orgassist')
 
 from .config import Config, ConfigError
-from .xmpp_bot import XmppBot
+from .bots import XmppBot
 from .assistant import Assistant
+
+from . import orgnode
 
 # Register commands
 from . import plugins
