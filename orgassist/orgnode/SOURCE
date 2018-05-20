@@ -1,0 +1,10 @@
+
+Code with changes from:
+https://github.com/blaa/orgnode
+
+Forked from: https://github.com/albins/orgnode
+Which was forked from: Takafumi Araraki's fork of Charles Cave's Python library for parsing org-mode files 
+
+This one might be better in future:
+https://github.com/bjonnh/PyOrgMode
+But I'd try to convince them to change to LGPL
