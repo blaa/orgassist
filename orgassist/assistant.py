@@ -63,7 +63,9 @@ class Assistant:
                 raise ConfigError("Configured plugin '%s' is not registered" %
                                   plugin_name)
 
-            plugin = plugin_cls(self, plugin_config, self.scheduler)
+            self.state[plugin_name] = {}
+            plugin = plugin_cls(self, plugin_config,
+                                self.scheduler, self.state[plugin_name])
             plugin.validate_config()
             plugin.register()
             self.plugins[plugin_name] = plugin
@@ -142,10 +144,11 @@ class AssistantPlugin:
     Handles some data state (eg. org-mode directory),
     configures scheduler and may initiate communication.
     """
-    def __init__(self, assistant, config, scheduler):
+    def __init__(self, assistant, config, scheduler, state):
         self.config = config
         self.scheduler = scheduler
         self.assistant = assistant
+        self.state = state
 
     def initialize(self):
         """

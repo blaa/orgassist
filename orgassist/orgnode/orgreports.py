@@ -84,7 +84,7 @@ def report_stat(incoming_list, tasks_open, tasks_all):
     return s
 
 
-def report_incoming(incoming_list):
+def report_incoming(incoming_list, cfg):
     "Report incoming tasks for following days"
     if not incoming_list:
         return
@@ -107,7 +107,7 @@ def report_incoming(incoming_list):
         marker = _get_marker(data['eventtype'])
         accurate = data['converted_date'] == data['date']
         # If equal - then the event has a time specified.
-        if accurate and data['delta']*24 < mark_in:
+        if accurate and data['delta']*24 < cfg['mark_in']:
             marker += '--> '
         else:
             marker += '    '
@@ -146,7 +146,7 @@ def report_unfinished(unfinished_list, cfg):
     return output
 
 
-def report_projects(projects, cfg):
+def report_projects(projects):
     "Report an open projects you're responsible for"
     if not projects:
         return

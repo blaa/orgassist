@@ -8,10 +8,16 @@ reminders to be included in environment status bar or shell.
 
 import re
 import datetime as dt
+import traceback as tb
 import os
 from collections import defaultdict
 
-from . import orgnode
+try:
+    # Normal operation
+    from . import orgnode
+except ImportError:
+    # Runtest
+    import orgnode
 
 def unindent(body):
     "Unindent a 'common indent' of body of text"
@@ -57,12 +63,18 @@ def unindent(body):
 def load_data(cfg):
     "Load data from all org-files using orgnode"
     db = []
+
+    todo_all = set(cfg['todos_open'])
+    todo_all.update(cfg['todos_closed'])
+    todo_all.add(cfg['project'])
+
     for path in cfg['files']:
-        db += orgnode.makelist(path, todo_default=cfg['todos'])
+        db += orgnode.makelist(path, todo_default=todo_all)
 
     if not cfg['files_re']:
         return db
 
+    first = True
     # Read by regexp
     regexp = re.compile(cfg['files_re'], flags=re.UNICODE)
     for root, dirs, files in os.walk(cfg['base'],
@@ -77,10 +89,13 @@ def load_data(cfg):
             path = os.path.join(root, filename)
             try:
                 db += orgnode.makelist(path,
-                                       todo_default=cfg['todos'])
+                                       todo_default=todo_all)
             except Exception:
                 print(("Warning: Ignoring error while parsing %s" % path))
                 if cfg['resilient']:
+                    if first:
+                        tb.print_exc()
+                    first = False
                     continue
                 raise
 
@@ -172,7 +187,7 @@ def get_incoming(db, cfg):
                     ret['projects'][current_entry][entry.todo] += 1
 
         # Now, ignore ones marked as "done/finished/closed"
-        if entry.todo in cfg['todos_ignored']:
+        if entry.todo in cfg['todos_closed']:
             continue
 
         def analyze_dates(dates, datetype):
@@ -247,7 +262,7 @@ def get_totals_stat(db, cfg):
         count_total += 1
 
         # Ignore ones marked as "done/finished/closed"
-        if entry.todo not in cfg['todos_ignored']:
+        if entry.todo not in cfg['todos_closed']:
             count_open += 1
 
     return count_open, count_total

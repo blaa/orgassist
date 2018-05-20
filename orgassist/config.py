@@ -1,4 +1,9 @@
+import os
 import yaml
+
+"""
+Handle config files with beautiful API
+"""
 
 class ConfigError(Exception):
     "Error while parsing config - show message and quit"
@@ -28,6 +33,7 @@ class Config:
         - Key can use dots to navigate nested config parts.
         - If key doesn't exist and is not required - the default value is returned
         - If key is required - ConfigError is raised.
+        - Changing default to non-None assumes value is not required.
         - If assert_type is not None, the value type is asserted checked.
         - If wrap is True - treat dicts as sub-configs
         """
@@ -39,7 +45,7 @@ class Config:
             if key_part in current:
                 current = current[key_part]
             else:
-                if required is True:
+                if required is True and default is None:
                     msg = "Required config key '%s' not found at level '%s'"
                     raise ConfigError(msg % (self._key_desc(key), key_part))
                 else:
@@ -62,7 +68,14 @@ class Config:
 
         return value
 
+    def get_path(self, key, default=None):
+        "Get a path from config. Expand user ~, $HOME variables"
+        value = self.get(key, default=default, assert_type=str)
+        value = os.path.expanduser(value)
+        return value
+
     def items(self, wrap=True):
+        "Dict-like interface with wrapping"
         for key, value in self._data.items():
             if isinstance(value, dict) and wrap:
                 yield (key, Config(value, partial=key))
