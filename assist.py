@@ -61,14 +61,14 @@ def setup():
     assistants = []
     for assistant_name, assistant_config in cfg.assistants.items():
 
-        s = orgassist.Assistant(assistant_name,
-                                assistant_config,
-                                scheduler)
+        assistant = orgassist.Assistant(assistant_name,
+                                        assistant_config,
+                                        scheduler)
 
-        s.register_xmpp_bot(xmpp_bot)
+        assistant.register_xmpp_bot(xmpp_bot)
         # FUTURE: s.register_irc_bot(irc)
 
-        assistants.append(s)
+        assistants.append(assistant)
 
     return {
         'xmpp_bot': xmpp_bot,

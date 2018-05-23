@@ -123,6 +123,7 @@ class Assistant:
 
     def register_command(self, names, callback):
         "Register command dispatch"
+        # TODO: Handle regular expressions as names
         if isinstance(names, str):
             names = [names]
         for name in names:

@@ -12,12 +12,9 @@ import traceback as tb
 import os
 from collections import defaultdict
 
-try:
-    # Normal operation
-    from . import orgnode
-except ImportError:
-    # Runtest
-    import orgnode
+from orgassist.helpers import Event
+
+from . import orgnode
 
 def unindent(body):
     "Unindent a 'common indent' of body of text"
@@ -108,12 +105,16 @@ def until(date, relative):
     """
 
     # Decorate with time
-    if isinstance(date, dt.date):
+    if not isinstance(date, dt.datetime):
         date = dt.datetime(date.year, date.month, date.day, 23, 59, 59)
+        appointment = False
+    else:
+        # Appointment is an event with accurate time defined.
+        appointment = True
 
     delta = (date - relative).total_seconds()
     # If negative - then a past event.
-    return date, delta / 60.0 / 60.0 / 24.0
+    return date, delta / 60.0 / 60.0 / 24.0, appointment
 
 
 def closest(date_list, relative):
@@ -127,8 +128,11 @@ def closest(date_list, relative):
     # Time delta for closest date
     closest_delta = None
 
+    # Is the date an appointment? (accurate to hour:minute?)
+    appointment = None
+
     for date in sorted(date_list):
-        converted_date, days = until(date, relative)
+        converted_date, days, appointment = until(date, relative)
 
         closest_date = date
         closest_converted_date = converted_date
@@ -143,7 +147,8 @@ def closest(date_list, relative):
     return {
         'converted_date': closest_converted_date,
         'date': closest_date,
-        'delta': closest_delta
+        'delta': closest_delta,
+        'appointment': appointment
     }
 
 
@@ -176,7 +181,6 @@ def get_incoming(db, cfg):
 
     for entry in db:
         # Iterate over entries
-
         if entry.todo and entry.parent in ret['projects']:
             # Count number of tasks open within a project.
             # DONE, TODO, all types
@@ -189,6 +193,8 @@ def get_incoming(db, cfg):
         # Now, ignore ones marked as "done/finished/closed"
         if entry.todo in cfg['todos_closed']:
             continue
+
+        print(entry)
 
         def analyze_dates(dates, datetype):
             data = closest(dates, relative=today)
@@ -224,8 +230,8 @@ def get_incoming(db, cfg):
             starts = [dr[0] for dr in entry.rangelist]
             analyze_dates(starts, 'RANGE')
 
-        scheduled = entry.Scheduled()
-        deadline = entry.Deadline()
+        scheduled = entry.scheduled
+        deadline = entry.deadline
 
         if scheduled:
             analyze_dates([scheduled], "SCHEDULED")
@@ -254,8 +260,8 @@ def get_totals_stat(db, cfg):
             # No designation at all, not a `task'
             continue
 
-        if (entry.datelist or entry.Scheduled() or
-            entry.Deadline() or entry.rangelist):
+        if (entry.datelist or entry.scheduled or
+            entry.deadline or entry.rangelist):
             # Has time - is already counted elsewhere
             continue
 

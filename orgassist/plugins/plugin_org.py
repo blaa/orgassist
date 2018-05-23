@@ -11,6 +11,8 @@ Works for me though.
 (C) 2018 by Tomasz bla Fortuna
 """
 
+import datetime as dt
+
 from orgassist import Assistant
 from orgassist import log
 from orgassist.assistant import AssistantPlugin
@@ -73,12 +75,28 @@ class OrgPlugin(AssistantPlugin):
         for aliases, callback in commands:
             self.assistant.register_command(aliases, callback)
 
+    def format_agenda(self):
+        "Format agenda"
+        incoming = self.state['db']['incoming']
+        incoming.sort()
+        today = dt.datetime.today()
+
+        for event in incoming:
+            closest_converted_date, data = incoming
+            todo = data['entry'].todo or 'TASK'
+
+            # TODO: This is a hack as those without hours get 23:59:59
+            accurate = data['converted_date'] == data['date']
+
+            s = "%s %9s %-20s %s"
+            s = s % (marker, todo, _get_delta(data['delta'], accurate),
+                     data['entry'].headline[:60])
+
+
+
     def handle_agenda(self, message):
         "Respond with an agenda on agenda command"
         message.respond('That is an agenda!')
         message.respond('It works!')
 
         self.state['db']
-
-
-

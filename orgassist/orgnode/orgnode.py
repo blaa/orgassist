@@ -38,9 +38,9 @@ import codecs
 
 def get_datetime(year, month, day, hour=None, minute=None, second=None):
     if "" in (year, month, day):
-        raise ValueError ("First three arguments must not contain empty str")
+        raise ValueError("First three arguments must not contain empty str")
     if None in (year, month, day):
-        raise ValueError ("First three arguments must not contain None")
+        raise ValueError("First three arguments must not contain None")
 
     ymdhms = []
     for a in [year, month, day, hour, minute, second]:
@@ -49,8 +49,7 @@ def get_datetime(year, month, day, hour=None, minute=None, second=None):
 
     if len(ymdhms) > 3:
         return datetime.datetime(*ymdhms)
-    else:
-        return datetime.date(*ymdhms)
+    return datetime.date(*ymdhms)
 
 def _re_compile_date():
     """
@@ -69,7 +68,7 @@ def _re_compile_date():
     '<2010-06-21 Mon 12:00>--<2010-06-21 Mon 12:00>'
     >>> m.group(16)
     """
-    date_pattern = "<(\d+)\-(\d+)\-(\d+)([^>\d]*)((\d+)\:(\d+))?>"
+    date_pattern = r"<(\d+)\-(\d+)\-(\d+)([^>\d]*)((\d+)\:(\d+))?>"
     re_date = re.compile('(%(dtp)s--%(dtp)s)|(%(dtp)s)'
                          % dict(dtp=date_pattern))
     return re_date
@@ -89,7 +88,7 @@ def find_daterangelist(string):
     return (datelist, rangelist)
 
 _RE_SCHEDULED = re.compile(
-    'SCHEDULED:\s+<(\d+)\-(\d+)\-(\d+)[^>\d]*((\d+)\:(\d+))?>')
+    r'SCHEDULED:\s+<(\d+)\-(\d+)\-(\d+)[^>\d]*((\d+)\:(\d+))?>')
 def find_scheduled(line):
     """
     Find SCHEDULED from given string.
@@ -100,19 +99,19 @@ def find_scheduled(line):
         if sd_re.group(4) == None:
             sched_date = datetime.date(int(sd_re.group(1)),
                                        int(sd_re.group(2)),
-                                       int(sd_re.group(3)) )
+                                       int(sd_re.group(3)))
         else:
             sched_date = datetime.datetime(int(sd_re.group(1)),
                                            int(sd_re.group(2)),
                                            int(sd_re.group(3)),
                                            int(sd_re.group(5)),
-                                           int(sd_re.group(6)) )
+                                           int(sd_re.group(6)))
     else:
         sched_date = None
     return sched_date
 
-_RE_DEADLINE = re.compile(
-    'DEADLINE:\s+<(\d+)\-(\d+)\-(\d+)[^>\d]*((\d+)\:(\d+))?>')
+_RE_DEADLINE = re.compile(r'DEADLINE:\s+<(\d+)\-(\d+)\-(\d+)[^>\d]*((\d+)\:(\d+))?>')
+
 def find_deadline(line):
     """
     Find DEADLINE from given string.
@@ -123,18 +122,18 @@ def find_deadline(line):
         if dd_re.group(4) == None:
             deadline_date = datetime.date(int(dd_re.group(1)),
                                           int(dd_re.group(2)),
-                                          int(dd_re.group(3)) )
+                                          int(dd_re.group(3)))
         else:
             deadline_date = datetime.datetime(int(dd_re.group(1)),
                                               int(dd_re.group(2)),
                                               int(dd_re.group(3)),
                                               int(dd_re.group(5)),
-                                              int(dd_re.group(6)) )
+                                              int(dd_re.group(6)))
     else:
         deadline_date = None
     return deadline_date
 
-_RE_TAGSRCH = re.compile('(.*?)\s*:(.*?):(.*?)$')
+_RE_TAGSRCH = re.compile(r'(.*?)\s*:(.*?):(.*?)$')
 def find_tags_and_heading(heading):
     """
     Get first tag, all tags, and heading without tags.
@@ -152,7 +151,7 @@ def find_tags_and_heading(heading):
             alltags |= set(tag2.split(':')) - set([''])
     return (tag1, alltags, heading)
 
-_RE_PROP_SRCH = re.compile('^\s*:(.*?):\s*(.*?)\s*$')
+_RE_PROP_SRCH = re.compile(r'^\s*:(.*?):\s*(.*?)\s*$')
 def find_property(line):
     """
     Find property from given string.
@@ -174,8 +173,7 @@ def find_property(line):
     return (prop_key, prop_val)
 
 
-_RE_CLOSED = re.compile(
-    'CLOSED:\s+\[(\d+)\-(\d+)\-(\d+)[^\]\d]*((\d+)\:(\d+))?\]')
+_RE_CLOSED = re.compile(r'CLOSED:\s+\[(\d+)\-(\d+)\-(\d+)[^\]\d]*((\d+)\:(\d+))?\]')
 def find_closed(line):
     """
     Find CLOSED from given string.
@@ -186,23 +184,24 @@ def find_closed(line):
         if cl_re.group(4) == None:
             closed_date = datetime.date(int(cl_re.group(1)),
                                         int(cl_re.group(2)),
-                                        int(cl_re.group(3)) )
+                                        int(cl_re.group(3)))
         else:
             closed_date = datetime.datetime(int(cl_re.group(1)),
                                             int(cl_re.group(2)),
                                             int(cl_re.group(3)),
                                             int(cl_re.group(5)),
-                                            int(cl_re.group(6)) )
+                                            int(cl_re.group(6)))
     else:
         closed_date = None
     return closed_date
 
 
 _RE_CLOCK = re.compile(
-    'CLOCK:\s+'
-    '\[(\d+)\-(\d+)\-(\d+)[^\]\d]*(\d+)\:(\d+)\]--'
-    '\[(\d+)\-(\d+)\-(\d+)[^\]\d]*(\d+)\:(\d+)\]\s+=>\s+(\d+)\:(\d+)'
+    r'CLOCK:\s+'
+    r'\[(\d+)\-(\d+)\-(\d+)[^\]\d]*(\d+)\:(\d+)\]--'
+    r'\[(\d+)\-(\d+)\-(\d+)[^\]\d]*(\d+)\:(\d+)\]\s+=>\s+(\d+)\:(\d+)'
     )
+
 def find_clock(line):
     """
     Find CLOCK from given string.
@@ -222,10 +221,10 @@ def find_clock(line):
         hm3[0]*60 + hm3[1],
         )
 
-_RE_HEADING = re.compile('^(\*+)\s(.*?)\s*$')
-_RE_TODO_KWDS = re.compile(' ([A-Z][A-Z0-9]+)\(?')
-_RE_TODO_SRCH = re.compile('^\s*([A-Z][A-Z0-9]+)\s(.*?)$')
-_RE_PRTY_SRCH = re.compile('^\[\#(A|B|C)\] (.*?)$')
+_RE_HEADING = re.compile(r'^(\*+)\s(.*?)\s*$')
+_RE_TODO_KWDS = re.compile(r' ([A-Z][A-Z0-9]+)\(?')
+_RE_TODO_SRCH = re.compile(r'^\s*([A-Z][A-Z0-9]+)\s(.*?)$')
+_RE_PRTY_SRCH = re.compile(r'^\[\#(A|B|C)\] (.*?)$')
 
 def makelist(filename, todo_default=['TODO', 'DONE']):
     """
@@ -237,19 +236,19 @@ def makelist(filename, todo_default=['TODO', 'DONE']):
     f = codecs.open(filename, 'r', 'utf8')
 
     todos = set(todo_default) # populated from #+SEQ_TODO line
-    level         = ''
-    heading       = ""
-    bodytext      = ""
-    tag1          = ""      # The first tag enclosed in ::
-    alltags       = set([]) # set of all tags in headline
-    sched_date    = ''
+    level = ''
+    heading = ""
+    bodytext = ""
+    tag1 = ""      # The first tag enclosed in ::
+    alltags = set([]) # set of all tags in headline
+    sched_date = ''
     deadline_date = ''
-    closed_date   = ''
-    clocklist     = []
-    datelist      = []
-    rangelist     = []
-    nodelist      = []
-    propdict      = dict()
+    closed_date = ''
+    clocklist = []
+    datelist = []
+    rangelist = []
+    nodelist = []
+    propdict = dict()
 
     for line in f:
         ctr += 1
@@ -257,38 +256,40 @@ def makelist(filename, todo_default=['TODO', 'DONE']):
 
         if hdng:
             if heading:  # we are processing a heading line
-                thisNode = Orgnode(level, heading, bodytext, tag1, alltags)
+                this_node = Orgnode(level, heading, bodytext, tag1, alltags)
                 if sched_date:
-                    thisNode.setScheduled(sched_date)
+                    this_node.set_scheduled(sched_date)
                     sched_date = ""
                 if deadline_date:
-                    thisNode.setDeadline(deadline_date)
+                    this_node.set_deadline(deadline_date)
                     deadline_date = ''
                 if closed_date:
-                    thisNode.setClosed(closed_date)
+                    this_node.set_closed(closed_date)
                     closed_date = ''
                 if clocklist:
-                    thisNode.setClock(clocklist)
+                    this_node.set_clock(clocklist)
                     clocklist = []
                 if datelist:
-                    thisNode.setDateList(datelist)
+                    this_node.set_datelist(datelist)
                     datelist = []
                 if rangelist:
-                    thisNode.setRangeList(rangelist)
+                    this_node.set_rangelist(rangelist)
                     rangelist = []
-                thisNode.setProperties(propdict)
-                nodelist.append( thisNode )
+                this_node.set_properties(propdict)
+                nodelist.append(this_node)
                 propdict = dict()
             level = hdng.group(1)
-            heading =  hdng.group(2)
+            heading = hdng.group(2)
             bodytext = ""
             (tag1, alltags, heading) = find_tags_and_heading(heading)
         else:      # we are processing a non-heading line
             if line.startswith('#+SEQ_TODO'):
                 todos |= set(_RE_TODO_KWDS.findall(line))
                 continue
-            if line.find(':PROPERTIES:') >= 0: continue
-            if line.find(':END:') >= 0: continue
+            if line.find(':PROPERTIES:') >= 0:
+                continue
+            if line.find(':END:') >= 0:
+                continue
             (prop_key, prop_val) = find_property(line)
             if prop_key:
                 propdict[prop_key] = prop_val
@@ -311,64 +312,64 @@ def makelist(filename, todo_default=['TODO', 'DONE']):
                 bodytext = bodytext + line
 
     # write out last node
-    thisNode = Orgnode(level, heading, bodytext, tag1, alltags)
-    thisNode.setProperties(propdict)
+    this_node = Orgnode(level, heading, bodytext, tag1, alltags)
+    this_node.set_properties(propdict)
     if sched_date:
-        thisNode.setScheduled(sched_date)
+        this_node.set_scheduled(sched_date)
     if deadline_date:
-        thisNode.setDeadline(deadline_date)
+        this_node.set_deadline(deadline_date)
     if closed_date:
-        thisNode.setClosed(closed_date)
+        this_node.set_closed(closed_date)
         closed_date = ''
     if clocklist:
-        thisNode.setClock(clocklist)
+        this_node.set_clock(clocklist)
         clocklist = []
     if datelist:
-        thisNode.setDateList(datelist)
+        this_node.set_datelist(datelist)
         datelist = []
     if rangelist:
-        thisNode.setRangeList(rangelist)
+        this_node.set_rangelist(rangelist)
         rangelist = []
-    nodelist.append( thisNode )
+    nodelist.append(this_node)
 
     # using the list of TODO keywords found in the file
     # process the headings searching for TODO keywords
     for n in nodelist:
-        h = n.Heading()
+        h = n.headline
 
-        todoSrch = _RE_TODO_SRCH.search(h)
+        todo_search = _RE_TODO_SRCH.search(h)
 
-        if todoSrch:
-            if todoSrch.group(1) in todos:
-                n.setHeading( todoSrch.group(2) )
-                n.setTodo ( todoSrch.group(1) )
-        prtysrch = _RE_PRTY_SRCH.search(n.Heading())
-        if prtysrch:
-            n.setPriority(prtysrch.group(1))
-            n.setHeading(prtysrch.group(2))
+        if todo_search:
+            if todo_search.group(1) in todos:
+                n.set_heading(todo_search.group(2))
+                n.set_todo(todo_search.group(1))
+        priority_search = _RE_PRTY_SRCH.search(n.headline)
+        if priority_search:
+            n.set_priority(priority_search.group(1))
+            n.set_heading(priority_search.group(2))
 
     # set parent of nodes
     ancestors = [None]
     n1 = nodelist[0]
-    l1 = n1.Level()
+    l1 = n1.level
     for n2 in nodelist:
         # n1, l1: previous node and its level
         # n2, l2: this node and its level
-        l2 = n2.Level()
+        l2 = n2.level
         if l1 < l2:
             ancestors.append(n1)
         else:
             while len(ancestors) > l2:
                 ancestors.pop()
         if ancestors:
-            n2.setParent(ancestors[-1])
+            n2.set_parent(ancestors[-1])
         n1 = n2
         l1 = l2
 
     return nodelist
 
 ######################
-class Orgnode(object):
+class Orgnode:
     """
     Orgnode class represents a headline, tags and text associated
     with the headline.
@@ -386,7 +387,7 @@ class Orgnode(object):
         self.tag = tag            # The first tag in the list
         self.tags = set(alltags)  # All tags in the headline
         self.todo = ""
-        self.prty = ""            # empty of A, B or C
+        self.priority = ""            # empty of A, B or C
         self.scheduled = ""       # Scheduled date
         self.deadline = ""        # Deadline date
         self.clock = []
@@ -396,67 +397,33 @@ class Orgnode(object):
         self.rangelist = []
         self.parent = None
 
-        # Look for priority in headline and transfer to prty field
+        # Look for priority in headline and transfer to priority field
 
-    def Heading(self):
-        """
-        Return the Heading text of the node without the TODO tag
-        """
-        return self.headline
-
-    def setHeading(self, newhdng):
+    def set_heading(self, newhdng):
         """
         Change the heading to the supplied string
         """
         self.headline = newhdng
 
-    def Body(self):
-        """
-        Returns all lines of text of the body of this node except the
-        Property Drawer
-        """
-        return self.body
-
-    def Level(self):
-        """
-        Returns an integer corresponding to the level of the node.
-        Top level (one asterisk) has a level of 1.
-        """
-        return self.level
-
-    def Priority(self):
-        """
-        Returns the priority of this headline: 'A', 'B', 'C' or empty
-        string if priority has not been set.
-        """
-        return self.prty
-
-    def setPriority(self, newprty):
+    def set_priority(self, newprty):
         """
         Change the value of the priority of this headline.
         Values values are '', 'A', 'B', 'C'
         """
-        self.prty = newprty
+        self.priority = newprty
 
-    def Tag(self):
-        """
-        Returns the value of the first tag.
-        For example, :HOME:COMPUTER: would return HOME
-        """
-        return self.tag
-
-    def Tags(self, inher=False):
+    def get_tags(self, inher=False):
         """
         Returns a list of all tags
         For example, :HOME:COMPUTER: would return ['HOME', 'COMPUTER']
         If `inher` is True, then all tags from ancestors is included.
         """
         if inher and self.parent:
-            return self.tags | set(self.parent.Tags(True))
+            return self.tags | set(self.parent.get_tags(True))
         else:
             return self.tags
 
-    def hasTag(self, srch):
+    def has_tag(self, srch):
         """
         Returns True if the supplied tag is present in this headline
         For example, hasTag('COMPUTER') on headling containing
@@ -464,118 +431,89 @@ class Orgnode(object):
         """
         return srch in self.tags
 
-    def setTag(self, newtag):
+    def set_tag(self, newtag):
         """
         Change the value of the first tag to the supplied string
         """
         self.tag = newtag
 
-    def setTags(self, taglist):
+    def set_tags(self, taglist):
         """
         Store all the tags found in the headline. The first tag will
         also be stored as if the setTag method was called.
         """
         self.tags |= set(taglist)
 
-    def Todo(self):
-        """
-        Return the value of the TODO tag
-        """
-        return self.todo
-
-    def setTodo(self, value):
+    def set_todo(self, value):
         """
         Set the value of the TODO tag to the supplied string
         """
         self.todo = value
 
-    def setProperties(self, dictval):
+    def set_properties(self, dictval):
         """
         Sets all properties using the supplied dictionary of
         name/value pairs
         """
         self.properties = dictval
 
-    def Properties(self):
-        """
-        Return the value of the properties.
-        """
-        return self.properties
-
-    def Property(self, keyval):
+    def get_property(self, keyval):
         """
         Returns the value of the requested property or null if the
         property does not exist.
         """
         return self.properties.get(keyval, "")
 
-    def setScheduled(self, dateval):
+    def set_scheduled(self, dateval):
         """
         Set the scheduled date using the supplied date object
         """
         self.scheduled = dateval
 
-    def Scheduled(self):
-        """
-        Return the scheduled date object or null if nonexistent
-        """
-        return self.scheduled
-
-    def setDeadline(self, dateval):
+    def set_deadline(self, dateval):
         """
         Set the deadline (due) date using the supplied date object
         """
         self.deadline = dateval
 
-    def Deadline(self):
-        """
-        Return the deadline date object or null if nonexistent
-        """
-        return self.deadline
-
-    def setDateList(self, datelist):
+    def set_datelist(self, datelist):
         """
         Set the list of date using list of the supplied date object
         """
         self.datelist = datelist[:]
 
-    def DateList(self):
+    def get_datelist(self):
         """
         Return the list of all date as date object
         """
         return self.datelist[:]
 
-    def setRangeList(self, rangelist):
+    def set_rangelist(self, rangelist):
         """
         Set the list of date range using list of the supplied timedelta object
         """
         self.rangelist = rangelist[:]
 
-    def RangeList(self):
+    def get_rangelist(self):
         """
         Return the list of all date as date object
         """
         return self.rangelist[:]
 
-    def hasDate(self):
+    def has_date(self):
+        "True if node has date"
         return (bool(self.scheduled) or
                 bool(self.deadline) or
                 bool(self.datelist) or
-                bool(self.rangelist) )
+                bool(self.rangelist))
 
-    def setClosed(self, closed):
+    def set_closed(self, closed):
         """
         Set the closed date using the supplied date object
         """
         self.closed = closed
 
-    def Closed(self):
-        """
-        Return closed time as datetime object or empty string if nonexistent.
-        """
-        return self.closed
-
-    def setClock(self, clock):
+    def set_clock(self, clock):
         """
         Set the list of clocked time using list of three tuple
         (start, stop, length) which is datetime object of start time,
@@ -583,25 +521,13 @@ class Orgnode(object):
         """
         self.clock = clock[:]
 
-    def Clock(self):
-        """
-        Return list of clocked time (tuple of (start, stop, length))
-        """
-        return self.clock
-
-    def setParent(self, parent):
+    def set_parent(self, parent):
         """
         Set parent node
         """
         self.parent = parent
 
-    def Parent(self):
-        """
-        Return parent node if exist else None.
-        """
-        return self.parent
-
-    def Root(self):
+    def get_root(self):
         """
         Return root node
 
@@ -615,7 +541,7 @@ class Orgnode(object):
         """
         child = self
         while True:
-            parent = child.Parent()
+            parent = child.parent
             if parent is None:
                 return child
             child = parent
@@ -626,21 +552,19 @@ class Orgnode(object):
         text as used to construct the node.
         """
         # This method is not completed yet.
-        n = ''
-        for i in range(0, self.level):
-            n = n + '*'
-        n = n + ' ' + self.todo + ' '
-        if self.prty:
-            n = n +  '[#' + self.prty + '] '
-        n = n + repr(self.headline)
-        n = "%-60s " % n     # hack - tags will start in column 62
+        txt = '*' * self.level
+        txt = txt + ' ' + self.todo + ' '
+        if self.priority:
+            txt = txt +  '[#' + self.priority + '] '
+        txt = txt + str(self.headline)
+        txt = "%-60s " % txt     # hack - tags will start in column 62
         closecolon = ''
         for t in sorted(self.tags):
-            n = n + ':' + t
+            txt = txt + ':' + t
             closecolon = ':'
-        n = n + closecolon
+        txt = txt + closecolon
 # Need to output Scheduled Date, Deadline Date, property tags The
 # following will output the text used to construct the object
-        n = n + "\n" + repr(self.body)
+        txt = txt + "\n" + repr(self.body)
 
-        return n
+        return txt
