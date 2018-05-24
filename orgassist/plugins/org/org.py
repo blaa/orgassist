@@ -13,14 +13,12 @@ Works for me though.
 
 import datetime as dt
 
-from orgassist import Assistant
 from orgassist import log
-from orgassist.assistant import AssistantPlugin
-
+from orgassist.assistant import Assistant, AssistantPlugin
 
 def load_org(cfg):
     "Bridge plugin with orgnode helpers"
-    from orgassist.orgnode import orghelpers
+    from .orgnode import orghelpers
     org_cfg = {
         # Include those files (full path)
         'files': cfg.get('files', default=[]),

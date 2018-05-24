@@ -12,7 +12,7 @@ import traceback as tb
 import os
 from collections import defaultdict
 
-from orgassist.helpers import Event
+from orgassist import calendar
 
 from . import orgnode
 
@@ -222,9 +222,9 @@ def get_incoming(db, cfg):
                 else:
                     ret['filtered_future'] += 1
 
-        event = Event(entry.headline)
+        event = calendar.Event(entry.headline)
         event.body = unindent(entry.body)
-        event.set_tags(entry.tags)
+        event.add_tags(entry.tags)
 
         analyze_dates(event, entry.datelist, 'TIMESTAMP')
 

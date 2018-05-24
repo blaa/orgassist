@@ -6,6 +6,8 @@ from time import sleep
 
 import schedule
 import orgassist
+from orgassist.config import Config, ConfigError
+from orgassist.assistant import Assistant
 
 def parse_args():
     "Parse arguments"
@@ -47,7 +49,7 @@ def setup():
     "Setup logging"
     args = parse_args()
 
-    cfg = orgassist.Config.from_file(args.config)
+    cfg = Config.from_file(args.config)
 
     setup_logging(cfg)
 
@@ -55,15 +57,15 @@ def setup():
     scheduler = schedule.Scheduler()
 
     # XMPP Bot / interface
-    xmpp_bot = orgassist.XmppBot(cfg.bots.xmpp)
+    xmpp_bot = orgassist.bots.XmppBot(cfg.bots.xmpp)
 
     # Create instances of assistants
     assistants = []
     for assistant_name, assistant_config in cfg.assistants.items():
 
-        assistant = orgassist.Assistant(assistant_name,
-                                        assistant_config,
-                                        scheduler)
+        assistant = Assistant(assistant_name,
+                              assistant_config,
+                              scheduler)
 
         assistant.register_xmpp_bot(xmpp_bot)
         # FUTURE: s.register_irc_bot(irc)
@@ -93,7 +95,7 @@ def main():
 
     try:
         program = setup()
-    except orgassist.ConfigError as ex:
+    except ConfigError as ex:
         print("Error while parsing your configuration file:")
         print(ex.args[0])
         return

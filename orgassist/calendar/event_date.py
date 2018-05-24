@@ -1,3 +1,8 @@
+"""
+Abstract dates away from the org plugin so they can be used in other
+modules and "agenda" handling can be shared.
+"""
+
 import datetime as dt
 import enum
 
@@ -83,8 +88,8 @@ class EventDate:
             other.date_type.value
         )
 
-        """
-        TODO: Remove when certain, the algorithm is ok.
+
+        # TODO: Remove when certain, the algorithm is ok.
         print("\nCOMPARE")
         print("  ", self, other)
         print("  ", delta_this, delta_other)
@@ -93,7 +98,7 @@ class EventDate:
             print("  THIS")
         else:
             print("  OTHER")
-        """
+
         return this_tuple <= other_tuple
 
     def __repr__(self):
@@ -111,51 +116,3 @@ class EventDate:
         txt = '<EventDate [%s]%s %s>' % (format_date(self.date), ranged,
                                          self.date_type.name)
         return txt
-
-class Event:
-    """
-    Abstracts a calendar event from plugins.
-    """
-
-    def __init__(self, headline, state=None):
-        """Initialize event variables"""
-
-        self.headline = headline
-        # "TODO", "DONE", etc. Varies, hence not an enum.
-        self.state = state
-        self.tags = set()
-
-        # The "most relevant date today".
-        # 1) The next future day of the event (for example of a cyclic event)
-        # 2) Or the last "todays" date
-        # 3) Last past date for unfinished/past events.
-        self.relevant_date = None
-
-        # Event can have multiple dates of various types.
-        self.dates = []
-
-        # Set of all date types for this event
-        self.event_types = set()
-
-        self.body = ""
-
-    def add_date(self, event_date):
-        "Add date to the event"
-        assert event_date not in self.dates
-
-        self.dates.append(event_date)
-
-        # Update relevant date
-        if self.relevant_date is None:
-            self.relevant_date = event_date
-        elif event_date.is_more_relevant(self.relevant_date):
-            self.relevant_date = event_date
-
-        # Update event type
-        self.event_types.add(event_date.date_type)
-
-    def add_tags(self, tags):
-        if isinstance(tags, str):
-            tags = {tags}
-        self.tags.update(tags)
-        return self

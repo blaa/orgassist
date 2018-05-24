@@ -3,11 +3,10 @@
 import logging
 log = logging.getLogger('orgassist')
 
-from .config import Config, ConfigError
-from .bots import XmppBot
-from .assistant import Assistant
-
-from . import orgnode
+from . import config
+from . import calendar
+from . import bots
+from . import assistant
 
 # Register commands
 from . import plugins

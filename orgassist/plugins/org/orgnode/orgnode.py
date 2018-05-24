@@ -28,13 +28,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 https://github.com/albins/orgnode.git
-
 """
 
 import re
 import datetime
 import codecs
-
 
 def get_datetime(year, month, day, hour=None, minute=None, second=None):
     if "" in (year, month, day):
@@ -233,7 +231,10 @@ def makelist(filename, todo_default=['TODO', 'DONE']):
     """
     ctr = 0
 
-    f = codecs.open(filename, 'r', 'utf8')
+    if isinstance(filename, str):
+        f = codecs.open(filename, 'r', 'utf8')
+    else:
+        f = filename
 
     todos = set(todo_default) # populated from #+SEQ_TODO line
     level = ''

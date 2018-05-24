@@ -1,4 +1,5 @@
-from orgassist import ConfigError
+
+from orgassist.config import ConfigError
 from orgassist import log, templates
 
 """
