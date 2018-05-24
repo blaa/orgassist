@@ -194,9 +194,7 @@ def get_incoming(db, cfg):
         if entry.todo in cfg['todos_closed']:
             continue
 
-        print(entry)
-
-        def analyze_dates(dates, datetype):
+        def analyze_dates(event, dates, datetype):
             data = closest(dates, relative=today)
 
             data.update({
@@ -224,20 +222,24 @@ def get_incoming(db, cfg):
                 else:
                     ret['filtered_future'] += 1
 
-        analyze_dates(entry.datelist, 'TIMESTAMP')
+        event = Event(entry.headline)
+        event.body = unindent(entry.body)
+        event.set_tags(entry.tags)
+
+        analyze_dates(event, entry.datelist, 'TIMESTAMP')
 
         if entry.rangelist:
             starts = [dr[0] for dr in entry.rangelist]
-            analyze_dates(starts, 'RANGE')
+            analyze_dates(event, starts, 'RANGE')
 
         scheduled = entry.scheduled
         deadline = entry.deadline
 
         if scheduled:
-            analyze_dates([scheduled], "SCHEDULED")
+            analyze_dates(event, [scheduled], "SCHEDULED")
 
         if deadline:
-            analyze_dates([deadline], "DEADLINE")
+            analyze_dates(event, [deadline], "DEADLINE")
 
         if entry.todo == cfg['project']:
             ret['projects'][entry] = defaultdict(lambda: 0)
