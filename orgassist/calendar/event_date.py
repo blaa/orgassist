@@ -88,8 +88,8 @@ class EventDate:
             other.date_type.value
         )
 
-
         # TODO: Remove when certain, the algorithm is ok.
+        """
         print("\nCOMPARE")
         print("  ", self, other)
         print("  ", delta_this, delta_other)
@@ -98,7 +98,7 @@ class EventDate:
             print("  THIS")
         else:
             print("  OTHER")
-
+        """
         return this_tuple <= other_tuple
 
     def __repr__(self):

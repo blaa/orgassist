@@ -103,7 +103,7 @@ class TestEvent(unittest.TestCase):
         sched_date = EventDate(now.date(), DateType.SCHEDULED)
         event.add_date(sched_date, relative_to=now)
 
-        self.assertTrue(DateType.SCHEDULED in event.event_types)
+        self.assertTrue(DateType.SCHEDULED in event.date_types)
         self.assertEqual(event.relevant_date, sched_date)
 
         # But when given another date:
@@ -111,14 +111,14 @@ class TestEvent(unittest.TestCase):
                              DateType.APPOINTMENT)
         event.add_date(app_date, relative_to=now)
 
-        self.assertTrue(DateType.APPOINTMENT in event.event_types)
+        self.assertTrue(DateType.APPOINTMENT in event.date_types)
         self.assertEqual(event.relevant_date, app_date)
 
         # Order should change anything:
         event = Event(headline, state="TODO")
         event.add_date(app_date, relative_to=now)
         event.add_date(sched_date, relative_to=now)
-        self.assertTrue(DateType.APPOINTMENT in event.event_types)
+        self.assertTrue(DateType.APPOINTMENT in event.date_types)
         self.assertEqual(event.relevant_date, app_date)
 
     def test_tags(self):

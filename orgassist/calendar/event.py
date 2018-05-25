@@ -16,6 +16,9 @@ class Event:
         self.state = state
         self.tags = set()
 
+        # A, B, C (letter)
+        self.priority = None
+
         # The "most relevant date today".
         # 1) The next future day of the event (for example of a cyclic event)
         # 2) Or the last "todays" date
@@ -26,7 +29,7 @@ class Event:
         self.dates = []
 
         # Set of all date types for this event
-        self.event_types = set()
+        self.date_types = set()
 
         self.body = ""
 
@@ -44,7 +47,7 @@ class Event:
             self.relevant_date = event_date
 
         # Update event type
-        self.event_types.add(event_date.date_type)
+        self.date_types.add(event_date.date_type)
 
     def add_tags(self, tags):
         "Add tags to the event"

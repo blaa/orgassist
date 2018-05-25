@@ -1,27 +1,50 @@
-
-import unittest
-import datetime as dt
-import jinja2
 import random
 import io
+import datetime as dt
 
-from orgassist import orgnode
+import unittest
+
+import jinja2
+
+from orgassist.calendar import DateType
+from . import orgnode
+from . import helpers
 
 # Example Org file for testing
 # pre-generated to have a todays dates.
 ORG_TMPL = """
 * PROJECT Aggregator
-** TODO This is open task   :TAG1:
+** TODO This is open task   :OPEN_TASK:
    SCHEDULED: <{{ today }}>
 ** TODO Past task           :TAG1:
    SCHEDULED: <{{ yesterday }}>
-** DONE Already done        :TAG2:
-   SCHEDULED: <{{ today }}>
-** Appointment
-   SCHEDULED: <{{ accurate }}>
+** DONE Already done        :DEADLINE:
+   DEADLINE: <{{ today }}>
+** [#B] Appointment         :APP:
+   <{{ accurate }}>
+** Inactive date            :INACTIVE:
+   [{{ accurate }}]
+** [#A] Ranged              :RANGE:
+   <{{ yesterday }}>--<{{ today }}>
 """
 DAYTIME = '%Y-%m-%d %a %H:%M'
 DAY = '%Y-%m-%d %a'
+
+# For testing org helpers
+ORG_CONFIG = {
+    'files': [],
+
+    'files_re': None,
+    'base': None,
+
+    'todos_open': ['TODO'],
+    'todos_closed': ['DONE', 'CANCELLED'],
+
+    # How grouping entry is marked - which groups TODOs and DONEs.
+    'project': 'PROJECT',
+
+    'resilient': False,
+}
 
 class TestOrg(unittest.TestCase):
     "Test org mode reading"
@@ -48,10 +71,44 @@ class TestOrg(unittest.TestCase):
 
     def test_orgnode(self):
         "Test reading ORG using orgnode"
-        db = orgnode.makelist(self.org_file)
+        db = orgnode.makelist(self.org_file,
+                              todo_default=['TODO', 'DONE', 'PROJECT'])
 
-        self.assertIn('TAG1', db[1].tags)
+        self.assertIn('OPEN_TASK', db[1].tags)
         self.assertEqual(db[1].headline, 'This is open task')
 
-        
+    def test_conversion(self):
+        "Test orgnode to events conversion"
+        db = orgnode.makelist(self.org_file,
+                              todo_default=['TODO', 'DONE', 'PROJECT'])
 
+        events = [
+            helpers.orgnode_to_event(node, ORG_CONFIG)
+            for node in db
+        ]
+
+        self.assertEqual(len(events), 7)
+
+        # Validate assumptions
+        for event in events:
+            if 'RANGE' in event.tags:
+                self.assertEqual(event.priority, 'A')
+                self.assertIn(DateType.RANGE, event.date_types)
+                self.assertEqual(event.relevant_date.date_type,
+                                 DateType.RANGE)
+            if 'OPEN_TASK' in event.tags:
+                self.assertEqual(event.priority, None)
+                self.assertEqual(event.state, 'TODO')
+                self.assertIn(DateType.SCHEDULED, event.date_types)
+                self.assertEqual(event.relevant_date.date_type,
+                                 DateType.SCHEDULED)
+            if 'DEADLINE' in event.tags:
+                relevant = event.relevant_date
+                self.assertEqual(event.state, 'DONE')
+                self.assertEqual(relevant.date_type,
+                                 DateType.DEADLINE)
+                self.assertFalse(relevant.appointment)
+            if 'APP' in event.tags:
+                relevant = event.relevant_date
+                self.assertEqual(event.priority, 'B')
+                self.assertTrue(relevant.appointment)

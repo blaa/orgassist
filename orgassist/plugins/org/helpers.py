@@ -12,7 +12,7 @@ import traceback as tb
 import os
 from collections import defaultdict
 
-from orgassist import calendar
+from orgassist.calendar import Event, EventDate, DateType
 
 from . import orgnode
 
@@ -57,8 +57,10 @@ def unindent(body):
 
     return "\n".join(unindented)
 
-def load_data(cfg):
+
+def load_orgnode(cfg):
     "Load data from all org-files using orgnode"
+    # Aggregated Orgnodes objects
     db = []
 
     todo_all = set(cfg['todos_open'])
@@ -98,11 +100,52 @@ def load_data(cfg):
 
     return db
 
+def orgnode_to_event(node, org_config, relative_to=None):
+    "Convert orgnode entries to events"
+    print(node)
+    event = Event(node.headline)
+    event.add_tags(node.tags)
+
+    event.body = unindent(node.body)
+    if node.todo:
+        event.state = node.todo
+    if node.priority:
+        event.priority = node.priority
+
+    if node.scheduled:
+        date = EventDate(node.scheduled, DateType.SCHEDULED)
+        event.add_date(date, relative_to)
+
+    if node.deadline:
+        date = EventDate(node.deadline, DateType.DEADLINE)
+        event.add_date(date, relative_to)
+
+    for ranged in node.rangelist:
+        date = EventDate(ranged, DateType.RANGE)
+        event.add_date(date, relative_to)
+
+    for node_date in node.datelist:
+        # Appointment dates
+        date = EventDate(node_date, DateType.APPOINTMENT)
+        event.add_date(date, relative_to)
+
+    print()
+    print(node)
+    print(event)
+    # node.priority
+
+    from IPython import embed
+    #embed()
+
+    return event
+
+
+"""
 def until(date, relative):
-    """
+    "
     Return time difference taking into account that date might not have a time given.
     If so - assume end of day. `relative' always has a time.
-    """
+    "
 
     # Decorate with time
     if not isinstance(date, dt.datetime):
@@ -151,6 +194,36 @@ def closest(date_list, relative):
         'appointment': appointment
     }
 
+def get_totals_stat(db, cfg):
+    "
+    Count all entries versus not ignored (opened).
+
+    This is supposed to help push TODOs without a specified execution time.
+    "
+    count_total = 0
+    count_open = 0
+
+    for entry in db:
+        # Iterate over entries
+
+        if not entry.todo:
+            # No designation at all, not a `task'
+            continue
+
+        if (entry.datelist or entry.scheduled or
+            entry.deadline or entry.rangelist):
+            # Has time - is already counted elsewhere
+            continue
+
+        count_total += 1
+
+        # Ignore ones marked as "done/finished/closed"
+        if entry.todo not in cfg['todos_closed']:
+            count_open += 1
+
+    return count_open, count_total
+
+"""
 
 def get_incoming(db, cfg):
     """
@@ -245,32 +318,3 @@ def get_incoming(db, cfg):
             ret['projects'][entry] = defaultdict(lambda: 0)
 
     return ret
-
-def get_totals_stat(db, cfg):
-    """
-    Count all entries versus not ignored (opened).
-
-    This is supposed to help push TODOs without a specified execution time.
-    """
-    count_total = 0
-    count_open = 0
-
-    for entry in db:
-        # Iterate over entries
-
-        if not entry.todo:
-            # No designation at all, not a `task'
-            continue
-
-        if (entry.datelist or entry.scheduled or
-            entry.deadline or entry.rangelist):
-            # Has time - is already counted elsewhere
-            continue
-
-        count_total += 1
-
-        # Ignore ones marked as "done/finished/closed"
-        if entry.todo not in cfg['todos_closed']:
-            count_open += 1
-
-    return count_open, count_total
