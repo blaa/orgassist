@@ -10,9 +10,6 @@ Works for me though.
 
 (C) 2018 by Tomasz bla Fortuna
 """
-
-import datetime as dt
-
 from orgassist import log
 from orgassist.assistant import Assistant, AssistantPlugin
 
@@ -28,7 +25,22 @@ class OrgPlugin(AssistantPlugin):
         "Refresh/load DB with org entries"
         log.info('Refreshed/read org-mode data')
         db = helpers.load_orgnode(self.parsed_config)
-        self.state['db'] = db
+        events = [
+            helpers.orgnode_to_event(node, self.parsed_config)
+            for node in db
+        ]
+
+        print("Calendar:", self.state)
+        self.state['calendar'].del_events('org')
+        self.state['calendar'].add_events(events, 'org')
+
+
+    def register(self):
+        commands = [
+            (['note', 'no'], self.handle_note),
+        ]
+        for aliases, callback in commands:
+            self.assistant.register_command(aliases, callback)
 
     def initialize(self):
         "Initialize org plugin, read database and schedule updates"
@@ -66,15 +78,6 @@ class OrgPlugin(AssistantPlugin):
             'resilient': False,
         }
 
-
-    def register(self):
-        commands = [
-            (['note', 'no'], self.handle_note),
-        ]
-        for aliases, callback in commands:
-            self.assistant.register_command(aliases, callback)
-
     def handle_note(self, message):
         "Take a note"
         pass
-

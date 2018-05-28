@@ -102,7 +102,6 @@ def load_orgnode(cfg):
 
 def orgnode_to_event(node, org_config, relative_to=None):
     "Convert orgnode entries to events"
-    print(node)
     event = Event(node.headline)
     event.add_tags(node.tags)
 
@@ -126,16 +125,8 @@ def orgnode_to_event(node, org_config, relative_to=None):
 
     for node_date in node.datelist:
         # Appointment dates
-        date = EventDate(node_date, DateType.APPOINTMENT)
+        date = EventDate(node_date, DateType.TIMESTAMP)
         event.add_date(date, relative_to)
-
-    print()
-    print(node)
-    print(event)
-    # node.priority
-
-    from IPython import embed
-    #embed()
 
     return event
 

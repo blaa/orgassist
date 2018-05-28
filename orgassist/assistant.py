@@ -15,18 +15,6 @@ class Assistant:
     Identifies his boss on the bots interfaces (xmpp, irc, etc.)
     Dispatches incoming messages to commands.
     """
-    class Message:
-        "API to unify all message data in one object"
-
-        def __init__(self, text, sender, respond):
-            self.text = text
-            self.sender = sender
-            self._respond = respond
-
-        def respond(self, text):
-            "Proxy to respond"
-            self._respond(text)
-
     # {'org': OrgContext, 'calendar': CalendarNotifications,
     #  'plugin_name': PluginClass }
     registered_plugins = {}
@@ -66,15 +54,14 @@ class Assistant:
                 raise ConfigError("Configured plugin '%s' is not registered" %
                                   plugin_name)
 
-            self.state[plugin_name] = {}
             plugin = plugin_cls(self, plugin_config,
-                                self.scheduler, self.state[plugin_name])
+                                self.scheduler, self.state)
             plugin.validate_config()
             plugin.register()
             self.plugins[plugin_name] = plugin
             log.info('Plugin %s instantiated', plugin_name)
 
-        # Initialize plugins
+        # After all plugins are created - initialize plugins
         for plugin in self.plugins.values():
             plugin.initialize()
 
@@ -136,18 +123,17 @@ class Assistant:
 
             self.commands[name] = callback
 
-    def handle_message(self, text, sender, respond):
+    def handle_message(self, message):
         """
         Handle command sent by the Boss.
         """
-        command = text.split()[0]
+        command = message.text.split()[0]
         command = command.lower().strip()
         handler = self.commands.get(command, None)
         if handler is not None:
-            message = self.Message(text, sender, respond)
             handler(message)
         else:
-            respond(templates.get('DONT_UNDERSTAND'))
+            message.respond(templates.get('DONT_UNDERSTAND'))
 
     def tell_boss(self, message):
         """
@@ -175,6 +161,8 @@ class AssistantPlugin:
     """
     Handles some data state (eg. org-mode directory),
     configures scheduler and may initiate communication.
+
+    for_all[validate_config -> register] -> for_all[initialize]
     """
     def __init__(self, assistant, config, scheduler, state):
         self.config = config
@@ -182,11 +170,20 @@ class AssistantPlugin:
         self.assistant = assistant
         self.state = state
 
+    def register(self):
+        """
+        Register commands and other callbacks.
+
+        Called first, before all plugins are created.
+        """
+        raise NotImplementedError
+
     def initialize(self):
         """
         Called once at the beginning to initialize - so implementors can leave
-        __init__ alone.
+        __init__ alone. All plugins are registered when this method is called.
         """
+        raise NotImplementedError
 
     def validate_config(self):
         """
@@ -196,7 +193,3 @@ class AssistantPlugin:
         what config keys were ignored (and are, for example, mistyped).
         """
 
-    def register(self):
-        """
-        Register commands and other callbacks.
-        """

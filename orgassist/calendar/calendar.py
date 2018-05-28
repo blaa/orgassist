@@ -1,54 +1,151 @@
 """
-org-mode compatible, agenda-focused calendar.
+Org-mode compatible calendar implementation - handles a number of events in
+time.
 """
+import datetime as dt
+import jinja2
 
 from orgassist import log
-from orgassist.assistant import Assistant, AssistantPlugin
 
-@Assistant.plugin('calendar')
-class CalendarCore(AssistantPlugin):
+class Calendar:
+    """
+    Manages multiple events
+    """
 
-    def initialize(self):
-        # How often to check calendar and plan notifications?
-        # If someone cancels an event after notification was scheduled
-        # the notification will happen anyway.
-        scan_interval = 120
+    def __init__(self, agenda_path=None, agenda_content=None):
+        "Initialize calendar"
 
-        self.scheduler.every(scan_interval).seconds.do(self.schedule_notifications)
+        # Events sorted by sort_date
+        self.events = []
 
+        # Path to agenda
+        self.agenda_path = agenda_path
+        self.agenda_content = agenda_content
+        assert self.agenda_content != self.agenda_path
 
-    def schedule_notifications(self):
-        "Schedule incoming notifications"
-        log.info('Would schedule notifications!')
+    def add_events(self, events, internal_tag=None):
+        "Add new events to the calendar"
+        for event in events:
+            event.meta['calendar_tag'] = internal_tag
+        self.events += events
+        self.events.sort()
 
-    def register(self):
-        commands = [
-            (['agenda', 'ag'], self.handle_agenda),
-        ]
-        for aliases, callback in commands:
-            self.assistant.register_command(aliases, callback)
+    def del_events(self, internal_tag=None):
+        "Delete events by internal tag"
+        if internal_tag is None:
+            self.events = []
 
-    def format_agenda(self):
-        "Format agenda"
-        incoming = self.state['db']['incoming']
-        incoming.sort()
-        today = dt.datetime.today()
+        else:
+            self.events = [
+                event
+                for event in self.events
+                if event.meta['calendar_tag'] == internal_tag
+            ]
 
-        for event in incoming:
-            closest_converted_date, data = incoming
-            todo = data['entry'].todo or 'TASK'
+    def get_unfinished(self, horizon, relative_to=None):
+        """
+        Get a list of past unfinished events
 
-            # TODO: This is a hack as those without hours get 23:59:59
-            accurate = data['converted_date'] == data['date']
+        Args:
+          horizon (datetime): The oldest date to consider.
+        """
+        if relative_to is None:
+            relative_to = dt.datetime.now()
 
-            s = "%s %9s %-20s %s"
-            s = s % (marker, todo, _get_delta(data['delta'], accurate),
-                     data['entry'].headline[:60])
+        print("GET UNFINISHED")
+        unfinished = []
+        for event in self.events:
+            print("  ", event)
+            date = event.relevant_date.sort_date
+            if date < horizon:
+                print("  BEFORE HORIZON")
+                continue
+            if event.state is not None and not event.state.is_open:
+                print("  NOT OPEN STATE")
+                continue
+            if date > relative_to:
+                # We are in future - not unfinished.
+                break
 
+            print("  GOT YOU")
+            unfinished.append(event)
+        return unfinished
 
-    def handle_agenda(self, message):
-        "Respond with an agenda on agenda command"
-        message.respond('That is an agenda!')
-        message.respond('It works!')
+    def get_incoming(self, horizon, relative_to=None):
+        "Get a list of scheduled and planned events"
+        incoming = []
+        if relative_to is None:
+            relative_to = dt.datetime.now()
 
-        self.state['db']
+        print("GET INCOMING")
+        incoming = []
+        for event in self.events:
+            date = event.relevant_date.sort_date
+            print("  ", event)
+            if date < relative_to:
+                print("    IN PAST")
+                continue
+            if date > horizon:
+                print("    OVER HORIZON")
+                break
+
+            # State doesn't matter as long as the date is accurate
+            if not event.relevant_date.appointment:
+                continue
+
+            print("  GOT YOU")
+            incoming.append(event)
+        return incoming
+
+    def get_scheduled(self, horizon, relative_to=None):
+        "Get tasks scheduled or deadlining in given period"
+        if relative_to is None:
+            relative_to = dt.datetime.now()
+
+        print("GET SCHEDULED")
+        scheduled = []
+        for event in self.events:
+            date = event.relevant_date.sort_date
+            print("  ", event)
+            if date < relative_to:
+                print("    IN PAST")
+                continue
+            if date > horizon:
+                print("    OVER HORIZON")
+                break
+
+            # State doesn't matter as long as the date is accurate
+            if not event.relevant_date.appointment:
+                continue
+
+            print("  GOT YOU")
+            scheduled.append(event)
+
+        return scheduled
+
+    def get_agenda(self, horizon_incoming, horizon_unfinished, relative_to=None):
+        "Generate agenda in a text format"
+
+        # Open and read when needed so the file can be updated
+        # without restarting bot.
+        log.info("Getting agenda from %r to %r",
+                 horizon_unfinished, horizon_incoming)
+        if self.agenda_content is not None:
+            assert self.agenda_path is None
+            content = self.agenda_content
+        else:
+            assert self.agenda_path is not None
+            with open(self.agenda_path, 'r') as handle:
+                content = handle.read()
+        template = jinja2.Template(content)
+
+        ctx = {
+            'unfinished': self.get_unfinished(horizon_unfinished,
+                                              relative_to),
+            'incoming': self.get_incoming(horizon_incoming, relative_to),
+        }
+        return template.render(ctx)
+
+    def __repr__(self):
+        txt = "<Calendar events=%d>"
+        return txt % len(self.events)

@@ -2,6 +2,7 @@ import logging
 from sleekxmpp import ClientXMPP
 
 from orgassist import templates
+from . import Message
 
 log = logging.getLogger('xmpp-bot')
 
@@ -45,32 +46,36 @@ class XmppBot:
 
     def message_dispatch(self, msg):
         "Dispatch incoming message depending on the sender"
-        print("message dispatch")
         if msg['type'] not in ('chat', 'normal'):
             log.warning('Unknown message type: %r %r', msg, msg['type'])
             return
 
-        def respond(response):
-            "Closure to simplify responding"
-            self.send_message(msg.get_from(), response)
-
         to_jid = msg.get_to()
         from_jid = msg.get_from()
-
         resource = to_jid.resource
+
+        def respond(response):
+            "Closure to simplify responding"
+            self.send_message(from_jid, response)
 
         print("----------------------")
         print("From: ", from_jid, "To: ", to_jid)
         print("Body: %r" % msg)
-        # Dispatch
+
+        # Dispatch direct (to resource) or generic (to JID)
         callback = self.dispatch_map.get((from_jid.bare, resource), None)
         if callback is None:
             callback = self.dispatch_map.get((from_jid.bare, None), None)
 
+        # If unknown - ignore
         if callback is None:
             respond(templates.get('DONT_KNOW'))
-        else:
-            callback(msg['body'], from_jid.full, respond)
+            return
+
+        # Construct a Message using bot-generic API
+        message = Message(msg['body'], from_jid.full, respond)
+
+        callback(message)
 
     def send_message(self, jid, message):
         "Send a message"

@@ -3,6 +3,8 @@ import random
 import datetime as dt
 
 from orgassist.calendar import EventDate, Event, DateType
+from orgassist.calendar import EventState
+from orgassist.calendar import Calendar
 
 class TestEvent(unittest.TestCase):
     """
@@ -23,69 +25,82 @@ class TestEvent(unittest.TestCase):
         return dt.datetime.now().replace(hour=random.randint(6, 10),
                                          minute=random.randint(0, 59))
 
-    def test_dates(self):
-        "Test event date creation"
-        now = self.day_starts()
+    def create_dates(self):
+        "Shared dates. A bit of ugly code to have low number of repetitions"
+        # pylint: disable=attribute-defined-outside-init,too-few-public-methods,too-many-instance-attributes
+        class Dates:
+            "Convenient date holder"
+        dates = Dates()
+
+        dates.now = self.day_starts()
+        now = dates.now
 
         # Test date creation
-        appointment_in_hour = EventDate(now + dt.timedelta(hours=1),
-                                        DateType.APPOINTMENT)
+        dates.appointment_in_hour = EventDate(now + dt.timedelta(hours=1),
+                                              DateType.TIMESTAMP)
 
-        deadline_in_hour = EventDate(now + dt.timedelta(hours=1),
-                                     DateType.DEADLINE)
+        dates.deadline_in_hour = EventDate(now + dt.timedelta(hours=1),
+                                           DateType.DEADLINE)
 
-        appointment_in_3hours = EventDate(now + dt.timedelta(hours=3),
-                                          DateType.APPOINTMENT)
+        dates.appointment_in_3hours = EventDate(now + dt.timedelta(hours=3),
+                                                DateType.TIMESTAMP)
 
-        appointment_later = EventDate(now + dt.timedelta(days=2),
-                                      DateType.APPOINTMENT)
+        dates.appointment_later = EventDate(now + dt.timedelta(days=2),
+                                            DateType.TIMESTAMP)
 
-        old_appointment = EventDate(now - dt.timedelta(days=2),
-                                    DateType.APPOINTMENT)
+        dates.old_appointment = EventDate(now - dt.timedelta(days=2),
+                                          DateType.TIMESTAMP)
 
-        task_today = EventDate(now.date(),
-                               DateType.SCHEDULED)
+        dates.task_today = EventDate(now.date(),
+                                     DateType.SCHEDULED)
 
-        deadline_yesterday = EventDate((now - dt.timedelta(days=1)).date(),
-                                       DateType.SCHEDULED)
+        dates.deadline_yesterday = EventDate((now - dt.timedelta(days=1)).date(),
+                                             DateType.SCHEDULED)
 
-        start_date = now + dt.timedelta(minutes=10)
-        end_date = now + dt.timedelta(days=3)
-        ranged_date = EventDate((start_date, end_date),
-                                DateType.RANGE)
+        dates.start_date = now + dt.timedelta(minutes=10)
+        dates.end_date = now + dt.timedelta(days=3)
+        dates.ranged_date = EventDate((dates.start_date,
+                                       dates.end_date),
+                                      DateType.RANGE)
+        return dates
+
+    def test_dates(self):
+        "Test event date creation"
+        dates = self.create_dates()
+        now = dates.now
 
         # Asserts on the API
-        self.assertEqual(ranged_date.date, start_date)
-        self.assertEqual(ranged_date.date_end, end_date)
-        self.assertEqual(ranged_date.date_type, DateType.RANGE)
-        self.assertTrue(ranged_date.appointment)
+        self.assertEqual(dates.ranged_date.date, dates.start_date)
+        self.assertEqual(dates.ranged_date.date_end, dates.end_date)
+        self.assertEqual(dates.ranged_date.date_type, DateType.RANGE)
+        self.assertTrue(dates.ranged_date.appointment)
 
-        self.assertTrue(appointment_in_3hours.appointment)
-        self.assertFalse(task_today.appointment)
+        self.assertTrue(dates.appointment_in_3hours.appointment)
+        self.assertFalse(dates.task_today.appointment)
 
         # Check relevancy algorithm
-        self.assertTrue(appointment_in_hour.is_more_relevant(appointment_in_3hours,
-                                                             relative_to=now))
-        self.assertTrue(appointment_in_hour.is_more_relevant(appointment_later,
-                                                             relative_to=now))
-        self.assertTrue(appointment_in_hour.is_more_relevant(task_today,
-                                                             relative_to=now))
-        self.assertFalse(task_today.is_more_relevant(appointment_in_hour,
-                                                     relative_to=now))
-        self.assertTrue(task_today.is_more_relevant(old_appointment,
-                                                    relative_to=now))
-        self.assertTrue(appointment_later.is_more_relevant(old_appointment,
+        self.assertTrue(dates.appointment_in_hour.is_more_relevant(dates.appointment_in_3hours,
+                                                                   relative_to=now))
+        self.assertTrue(dates.appointment_in_hour.is_more_relevant(dates.appointment_later,
+                                                                   relative_to=now))
+        self.assertTrue(dates.appointment_in_hour.is_more_relevant(dates.task_today,
+                                                                   relative_to=now))
+        self.assertFalse(dates.task_today.is_more_relevant(dates.appointment_in_hour,
                                                            relative_to=now))
+        self.assertTrue(dates.task_today.is_more_relevant(dates.old_appointment,
+                                                          relative_to=now))
+        self.assertTrue(dates.appointment_later.is_more_relevant(dates.old_appointment,
+                                                                 relative_to=now))
 
         # Ranged starts earlier
-        self.assertFalse(appointment_in_3hours.is_more_relevant(ranged_date,
-                                                                relative_to=now))
+        self.assertFalse(dates.appointment_in_3hours.is_more_relevant(dates.ranged_date,
+                                                                      relative_to=now))
 
         # Mixed thoughts on that. ;-)
-        self.assertTrue(task_today.is_more_relevant(deadline_yesterday,
-                                                    relative_to=now))
-        self.assertTrue(deadline_in_hour.is_more_relevant(appointment_in_hour,
+        self.assertTrue(dates.task_today.is_more_relevant(dates.deadline_yesterday,
                                                           relative_to=now))
+        self.assertTrue(dates.deadline_in_hour.is_more_relevant(dates.appointment_in_hour,
+                                                                relative_to=now))
 
     def test_events(self):
         "Test event behaviour"
@@ -108,23 +123,61 @@ class TestEvent(unittest.TestCase):
 
         # But when given another date:
         app_date = EventDate(now + dt.timedelta(hours=2),
-                             DateType.APPOINTMENT)
+                             DateType.TIMESTAMP)
         event.add_date(app_date, relative_to=now)
 
-        self.assertTrue(DateType.APPOINTMENT in event.date_types)
+        self.assertTrue(DateType.TIMESTAMP in event.date_types)
         self.assertEqual(event.relevant_date, app_date)
 
         # Order should change anything:
-        event = Event(headline, state="TODO")
+        state = EventState("TODO")
+        event = Event(headline, state=state)
         event.add_date(app_date, relative_to=now)
         event.add_date(sched_date, relative_to=now)
-        self.assertTrue(DateType.APPOINTMENT in event.date_types)
+        self.assertTrue(DateType.TIMESTAMP in event.date_types)
         self.assertEqual(event.relevant_date, app_date)
 
     def test_tags(self):
         "Test tags on event"
 
         headline = "This is an event headline!"
-        event = Event(headline, state="TODO")
+        state = EventState("TODO")
+        self.assertTrue(state.is_open)
+        event = Event(headline, state=state)
         event.add_tags(["TEST", "PRIVATE"])
         self.assertIn('TEST', event.tags)
+
+    def test_calendar(self):
+        "Test calendar behaviour"
+        dates = self.create_dates()
+        events = []
+        for name, value in dates.__dict__.items():
+            if isinstance(value, EventDate):
+                event = Event(name)
+                event.add_date(value)
+                events.append(event)
+
+        horizon_incoming = dates.now.replace(hour=23, minute=59, second=59)
+        horizon_unfinished = dates.now - dt.timedelta(days=2)
+
+        agenda_template = """
+        {% for task in unfinished %}
+         Unfinished:{{ task }}
+        {% endfor %}
+        {% for task in incoming %}
+         Incoming:{{ task }}
+        {% endfor %}
+        """
+
+        calendar = Calendar(agenda_content=agenda_template)
+        calendar.add_events(events, internal_tag='org')
+
+        unfinished = calendar.get_unfinished(horizon_unfinished, relative_to=dates.now)
+        scheduled = calendar.get_scheduled(horizon_incoming, relative_to=dates.now)
+        agenda = calendar.get_agenda(horizon_incoming=horizon_incoming,
+                                     horizon_unfinished=horizon_unfinished)
+
+        print("AGENDA:", type(agenda), agenda, "END")
+        self.assertGreaterEqual(len(unfinished), 2)
+        #self.assertGreaterEqual(len(scheduled), 0)
+        #self.assertGreaterEqual(len(agenda.split('\n')), 5)

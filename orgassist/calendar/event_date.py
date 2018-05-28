@@ -13,7 +13,8 @@ class DateType(enum.Enum):
     Smaller values sort as "more" important in relevancy algorithm.
     """
     DEADLINE = enum.auto()
-    APPOINTMENT = enum.auto()
+    # An active date with or without timestamp
+    TIMESTAMP = enum.auto()
     SCHEDULED = enum.auto()
     RANGE = enum.auto()
 
@@ -46,9 +47,9 @@ class EventDate:
             self.sort_date = self.date
             self.appointment = True
 
-    def __le__(self, event_date):
+    def __lt__(self, event_date):
         "Compare dates"
-        return self.sort_date <= event_date.sort_date
+        return self.sort_date < event_date.sort_date
 
     def is_more_relevant(self, other, relative_to=None):
         """

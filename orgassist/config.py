@@ -79,10 +79,12 @@ class Config:
                     ]
         return value
 
-    def get_path(self, key, default=None):
+    def get_path(self, key, default=None, required=True):
         "Get a path from config. Expand user ~, $HOME variables"
-        value = self.get(key, default=default, assert_type=str)
-        value = os.path.expanduser(value)
+        value = self.get(key, default=default,
+                         required=required, assert_type=str)
+        if value is not None:
+            value = os.path.expanduser(value)
         return value
 
     def items(self, wrap=True):

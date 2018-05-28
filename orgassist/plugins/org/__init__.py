@@ -1,1 +1,1 @@
-from .org import OrgPlugin
+from .plugin import OrgPlugin

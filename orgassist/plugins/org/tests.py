@@ -22,6 +22,8 @@ ORG_TMPL = """
    DEADLINE: <{{ today }}>
 ** [#B] Appointment         :APP:
    <{{ accurate }}>
+** Whole day event          :WHOLE_DAY:
+   <{{ today }}>
 ** Inactive date            :INACTIVE:
    [{{ accurate }}]
 ** [#A] Ranged              :RANGE:
@@ -68,29 +70,29 @@ class TestOrg(unittest.TestCase):
 
         self.rendered_org = tmpl.render(context)
         self.org_file = io.StringIO(self.rendered_org)
+        self.db = orgnode.makelist(self.org_file,
+                                   todo_default=['TODO', 'DONE', 'PROJECT'])
+
 
     def test_orgnode(self):
         "Test reading ORG using orgnode"
-        db = orgnode.makelist(self.org_file,
-                              todo_default=['TODO', 'DONE', 'PROJECT'])
-
-        self.assertIn('OPEN_TASK', db[1].tags)
-        self.assertEqual(db[1].headline, 'This is open task')
+        self.assertIn('OPEN_TASK', self.db[1].tags)
+        self.assertEqual(self.db[1].headline, 'This is open task')
 
     def test_conversion(self):
         "Test orgnode to events conversion"
-        db = orgnode.makelist(self.org_file,
-                              todo_default=['TODO', 'DONE', 'PROJECT'])
-
         events = [
             helpers.orgnode_to_event(node, ORG_CONFIG)
-            for node in db
+            for node in self.db
         ]
 
-        self.assertEqual(len(events), 7)
+        # If something fails intermittently - show debug data
+        print(self.rendered_org)
 
         # Validate assumptions
         for event in events:
+            print(event)
+
             if 'RANGE' in event.tags:
                 self.assertEqual(event.priority, 'A')
                 self.assertIn(DateType.RANGE, event.date_types)
@@ -110,5 +112,10 @@ class TestOrg(unittest.TestCase):
                 self.assertFalse(relevant.appointment)
             if 'APP' in event.tags:
                 relevant = event.relevant_date
+
                 self.assertEqual(event.priority, 'B')
                 self.assertTrue(relevant.appointment)
+
+        self.assertEqual(len(events), 8)
+
+

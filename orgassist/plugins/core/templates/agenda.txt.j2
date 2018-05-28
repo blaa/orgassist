@@ -1,0 +1,16 @@
+{% if apps %}
+You have following appointments today:
+  {% for app in apps %}
+    {{ app }}
+    {% if app.eventtype == 'SCHEDULED' %}
+    {% elif app.eventtype == 'TIMESTAMP' %}
+    {% elif app.eventtype == 'RANGE' %}
+    {% elif app.eventtype == 'DEADLINE' %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if planned %}
+You planned for today:
+
+{% endif %}
