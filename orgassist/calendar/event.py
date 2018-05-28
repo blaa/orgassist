@@ -48,11 +48,8 @@ class Event:
 
         self.headline = headline
 
-        # Handle state as object or string - if string, cast to object.
-        if isinstance(state, str):
-            state = EventState(state)
-        else:
-            self.state = state
+        # Set state
+        self.set_state(state)
 
         self.tags = set()
 
@@ -94,6 +91,13 @@ class Event:
         # Update event type
         self.date_types.add(event_date.date_type)
 
+    def set_state(self, state):
+        "Handle state as object or string - if string, cast to object"
+        if isinstance(state, str):
+            self.state = EventState(state)
+        else:
+            self.state = state
+
     def add_tags(self, tags):
         "Add tags to the event"
         if isinstance(tags, str):
@@ -106,6 +110,7 @@ class Event:
         add_up = [
             field if isinstance(field, str) else repr(field)
             for field in [
+                "'" + self.headline[:10] + "'",
                 self.priority,
                 self.state,
                 self.relevant_date,

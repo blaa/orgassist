@@ -164,7 +164,15 @@ class AssistantPlugin:
 
     for_all[validate_config -> register] -> for_all[initialize]
     """
+
     def __init__(self, assistant, config, scheduler, state):
+        """
+        Args:
+          assistant: Connected assistant object
+          config: Part of config which is relevant to the plugin
+          scheduler: Common scheduler which gets executed in the main loop
+          state: a state shared between the plugins.
+        """
         self.config = config
         self.scheduler = scheduler
         self.assistant = assistant

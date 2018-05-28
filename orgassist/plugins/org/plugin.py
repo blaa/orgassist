@@ -30,7 +30,13 @@ class OrgPlugin(AssistantPlugin):
             for node in db
         ]
 
-        print("Calendar:", self.state)
+        # TODO: Handle TODOs too, not only the appointments/schedules
+        events = [
+            event
+            for event in events
+            if event.relevant_date is not None
+        ]
+
         self.state['calendar'].del_events('org')
         self.state['calendar'].add_events(events, 'org')
 

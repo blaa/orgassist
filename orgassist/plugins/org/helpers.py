@@ -12,7 +12,8 @@ import traceback as tb
 import os
 from collections import defaultdict
 
-from orgassist.calendar import Event, EventDate, DateType
+from orgassist.calendar import Event, EventState
+from orgassist.calendar import EventDate, DateType
 
 from . import orgnode
 
@@ -107,7 +108,9 @@ def orgnode_to_event(node, org_config, relative_to=None):
 
     event.body = unindent(node.body)
     if node.todo:
-        event.state = node.todo
+        state = EventState(node.todo,
+                           is_open=node.todo in org_config['todos_open'])
+        event.set_state(state)
     if node.priority:
         event.priority = node.priority
 

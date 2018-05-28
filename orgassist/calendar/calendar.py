@@ -39,7 +39,7 @@ class Calendar:
             self.events = [
                 event
                 for event in self.events
-                if event.meta['calendar_tag'] == internal_tag
+                if event.meta['calendar_tag'] != internal_tag
             ]
 
     def get_unfinished(self, horizon, relative_to=None):
@@ -125,11 +125,11 @@ class Calendar:
 
     def get_agenda(self, horizon_incoming, horizon_unfinished, relative_to=None):
         "Generate agenda in a text format"
+        log.info("Getting agenda from %r to %r",
+                 horizon_unfinished, horizon_incoming)
 
         # Open and read when needed so the file can be updated
         # without restarting bot.
-        log.info("Getting agenda from %r to %r",
-                 horizon_unfinished, horizon_incoming)
         if self.agenda_content is not None:
             assert self.agenda_path is None
             content = self.agenda_content
@@ -139,11 +139,16 @@ class Calendar:
                 content = handle.read()
         template = jinja2.Template(content)
 
+
         ctx = {
             'unfinished': self.get_unfinished(horizon_unfinished,
                                               relative_to),
             'incoming': self.get_incoming(horizon_incoming, relative_to),
+            'today': relative_to,
         }
+        print("GOT TEMPLATE:", content)
+
+        log.info("%r", ctx)
         return template.render(ctx)
 
     def __repr__(self):

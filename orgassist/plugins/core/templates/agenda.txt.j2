@@ -1,16 +1,13 @@
-{% if apps %}
-You have following appointments today:
-  {% for app in apps %}
-    {{ app }}
-    {% if app.eventtype == 'SCHEDULED' %}
-    {% elif app.eventtype == 'TIMESTAMP' %}
-    {% elif app.eventtype == 'RANGE' %}
-    {% elif app.eventtype == 'DEADLINE' %}
-    {% endif %}
-  {% endfor %}
-{% endif %}
 
-{% if planned %}
-You planned for today:
-
+{% if incoming -%}
+You have following appointments {{ today.strftime("%Y-%m-%d")}}:
+{%- for event  in incoming %}
+  At {{event.relevant_date.date.strftime("%H:%M") }}: {{ event.headline }}
+{%- endfor %}
+{%- endif %}
+{% if unfinished %}
+And you haven't finished following:
+{%- for event  in unfinished %}
+  {{event.state.name }}: {{ event.headline }}
+{%- endfor %}
 {% endif %}

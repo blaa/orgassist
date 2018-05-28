@@ -43,14 +43,16 @@ class CalendarCore(AssistantPlugin):
                                         default=720)
 
         self.agenda_path = cfg.get_path('agenda.agenda_template_path',
-                                             required=False)
+                                        required=False)
         if not self.agenda_path:
+            print("No path in config file")
             path = os.path.dirname(os.path.abspath(__file__))
             self.agenda_path = os.path.join(path,
                                             'templates',
                                             'agenda.txt.j2')
 
         try:
+            print("Trying agenda:", self.agenda_path)
             with open(self.agenda_path):
                 pass
         except IOError:
@@ -87,4 +89,5 @@ class CalendarCore(AssistantPlugin):
             tb.print_exc()
             message.respond("Error while rendering Agenda template.")
             return
+        print("Returning agenda:", agenda)
         message.respond(agenda)
