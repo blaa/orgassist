@@ -15,14 +15,32 @@ from orgassist.calendar import Calendar
 class CalendarCore(AssistantPlugin):
 
     def initialize(self):
-        # How often to check calendar and plan notifications?
-        # If someone cancels an event after notification was scheduled
-        # the notification will happen anyway.
+        # Initialize schedulers
         scan_interval = 120
         self.scheduler.every(scan_interval).seconds.do(self.schedule_notifications)
+        for time in self.agenda_times:
+            self.scheduler.every().day.at(time).do(self.send_agenda)
+
+        # Incoming notifications
+        self.notify_queues = {}
+        for time in self.agenda_times:
+            delta = dt.timedelta(minutes=time)
+
 
     def schedule_notifications(self):
         "Schedule incoming notifications"
+
+        # Program may hang for indefinite amount of time and we still should
+        # not miss any notifications. At the same time calendar may get updated,
+        # tasks added or removed. We can't send duplicates.
+
+        # Prepare notification 5 minutes before it happens
+        prepare_before = 5
+
+        now = dt.datetime.now()
+
+        # Build an incoming list of stuff that WILL get notifications
+
         log.info('Would schedule notifications!')
 
     def validate_config(self):
@@ -74,9 +92,12 @@ class CalendarCore(AssistantPlugin):
 
     def handle_agenda(self, message):
         "Respond with an agenda on agenda command"
-        message.respond('That is an agenda!')
-        message.respond('It works!')
+        agenda = self.get_agenda()
+        print("Returning agenda:", agenda)
+        message.respond(agenda)
 
+    def get_agenda(self):
+        "Generate agenda"
         now = dt.datetime.now()
         horizon_unfinished = now - dt.timedelta(hours=self.horizon_unfinished)
         horizon_incoming = now + dt.timedelta(hours=self.horizon_incoming)
@@ -85,9 +106,12 @@ class CalendarCore(AssistantPlugin):
             agenda = self.calendar.get_agenda(horizon_incoming,
                                               horizon_unfinished,
                                               relative_to=now)
+            return agenda
         except Exception:
             tb.print_exc()
-            message.respond("Error while rendering Agenda template.")
-            return
-        print("Returning agenda:", agenda)
-        message.respond(agenda)
+            return "Error while rendering Agenda template."
+
+    def send_agenda(self):
+        "Used for sending periodically agenda"
+        agenda = self.get_agenda()
+        self.assistant.tell_boss(agenda)

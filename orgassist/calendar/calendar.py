@@ -9,9 +9,8 @@ from orgassist import log
 
 class Calendar:
     """
-    Manages multiple events
+    Manages multiple events, generates agenda
     """
-
     def __init__(self, agenda_path=None, agenda_content=None):
         "Initialize calendar"
 
@@ -125,6 +124,7 @@ class Calendar:
 
     def get_agenda(self, horizon_incoming, horizon_unfinished, relative_to=None):
         "Generate agenda in a text format"
+
         log.info("Getting agenda from %r to %r",
                  horizon_unfinished, horizon_incoming)
 
@@ -138,7 +138,6 @@ class Calendar:
             with open(self.agenda_path, 'r') as handle:
                 content = handle.read()
         template = jinja2.Template(content)
-
 
         ctx = {
             'unfinished': self.get_unfinished(horizon_unfinished,
