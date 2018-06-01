@@ -1,4 +1,3 @@
-
 from orgassist.config import ConfigError
 from orgassist import log, templates
 
@@ -99,7 +98,7 @@ class Assistant:
                     send_to = jid
                     if resource is not None:
                         send_to += '/' + resource
-                    print("OUT TO", send_to)
+                    log.debug("Message to %s, body: %s", send_to, msg)
                     bot.send_message(send_to, msg)
                 self.boss_channels.append(out)
 
@@ -200,4 +199,3 @@ class AssistantPlugin:
         Touch all valid config options here, so that Config class can report
         what config keys were ignored (and are, for example, mistyped).
         """
-

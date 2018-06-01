@@ -12,6 +12,7 @@ import traceback as tb
 import os
 from collections import defaultdict
 
+from orgassist import log
 from orgassist.calendar import Event, EventState
 from orgassist.calendar import EventDate, DateType
 
@@ -91,8 +92,8 @@ def load_orgnode(cfg):
                 db += orgnode.makelist(path,
                                        todo_default=todo_all)
             except Exception:
-                print(("Warning: Ignoring error while parsing %s" % path))
                 if cfg['resilient']:
+                    log.warning("Warning: Ignoring error while parsing %s", path)
                     if first:
                         tb.print_exc()
                     first = False

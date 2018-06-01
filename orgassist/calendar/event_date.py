@@ -12,11 +12,11 @@ class DateType(enum.Enum):
 
     Smaller values sort as "more" important in relevancy algorithm.
     """
-    DEADLINE = enum.auto()
+    DEADLINE = 1
     # An active date with or without timestamp
-    TIMESTAMP = enum.auto()
-    SCHEDULED = enum.auto()
-    RANGE = enum.auto()
+    TIMESTAMP = 2
+    SCHEDULED = 3
+    RANGE = 4
 
 class EventDate:
     """

@@ -1,22 +1,25 @@
+"""
+Build configuration
+"""
 import setuptools
 
-VERSION=(0, 1, 1)
+VERSION = (0, 1, 3)
 
 with open("README.md", "r") as handler:
-    long_desc = handler.read()
+    LONG_DESC = handler.read()
 
 setuptools.setup(
     name="orgassist",
     version=".".join(str(f) for f in VERSION),
     description=("Assistant who handles your appointments, tasks "
                  "and note-taking when you're away from your computer"),
-    long_description=long_desc,
+    long_description=LONG_DESC,
     author="Tomasz bla Fortuna",
     author_email="bla@thera.be",
     url="https://github.com/blaa/orgassist",
     keywords="org-mode emacs bot xmpp planner",
     scripts=['assist.py'],
-    data_files=['config.tmpl.yml'],
+    include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=[
         'PyYAML==3.12',

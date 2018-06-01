@@ -1,34 +1,62 @@
-import logging
+
 from sleekxmpp import ClientXMPP
+from sleekxmpp.thirdparty import socks
 
 from orgassist import templates
 from . import Message
-
-log = logging.getLogger('xmpp-bot')
+from . import log
 
 class XmppBot:
     """
     Interfaces with Jabber and identifies bosses by JID and resource.
     """
-
     def __init__(self, connect_cfg):
         "Initialize XMPP bot"
         # (Sender JID, [local resource]) -> callback
         self.dispatch_map = {}
 
         self.jid = connect_cfg.jid
-        self.connect(connect_cfg.password)
+        self.connect(connect_cfg)
 
-    def connect(self, password):
+    def connect(self, config):
         "Connect to XMPP server"
-        self.client = ClientXMPP(self.jid, password)
+        socks_cfg = config.get('socks_proxy', required=False)
+        if socks_cfg is not None:
+            # TODO: Doesn't work yet. Doesn't implement a makelist
+            socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,
+                                  socks_cfg.get('host', assert_type=str),
+                                  socks_cfg.get('port', assert_type=int),
+                                  rdns=True)
+            socket = socks.socksocket
+        else:
+            socket = None
+
+        self.client = ClientXMPP(self.jid, config.password, socket=socket)
+        proxy_cfg = config.get('http_proxy', required=False)
+        if proxy_cfg is not None:
+            self.client.use_proxy = True
+            self.client.proxy_config = {
+                'host': proxy_cfg.host,
+                'port': proxy_cfg.get('port', assert_type=int),
+                'username': proxy_cfg.get('username', required=False),
+                'password': proxy_cfg.get('password', required=False),
+            }
+            print("Configured proxy", self.client.proxy_config)
+
+        use_tls = config.get('tls', default=True)
 
         # Events
         self.client.add_event_handler("session_start", self._session_start)
         self.client.add_event_handler("message", self.message_dispatch)
 
         log.info("Initializing connection to XMPP")
-        self.client.connect(use_tls=True)
+        ip = config.get('ip', required=False)
+        if ip is not None:
+            print("port", config.port)
+            port = config.get('port', default=5222, assert_type=int)
+            self.client.connect((ip, port), use_tls=use_tls)
+        else:
+            self.client.connect(use_tls=use_tls)
 
     def _session_start(self, event):
         log.info('Starting XMPP session')
@@ -58,9 +86,9 @@ class XmppBot:
             "Closure to simplify responding"
             self.send_message(from_jid, response)
 
-        print("----------------------")
-        print("From: ", from_jid, "To: ", to_jid)
-        print("Body: %r" % msg)
+        log.debug("Got message:")
+        log.debug("From: %s, to: %s", from_jid, to_jid)
+        log.debug("Body: %r", msg)
 
         # Dispatch direct (to resource) or generic (to JID)
         callback = self.dispatch_map.get((from_jid.bare, resource), None)

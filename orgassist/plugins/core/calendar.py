@@ -54,21 +54,19 @@ class CalendarCore(AssistantPlugin):
 
         now = dt.datetime.now()
 
-        # FIXME: EXPERIMENT
+        # FIXME: EXPERIMENT, REMOVE.
         # from orgassist.calendar import Event, EventDate, DateType
         # event = Event("This is a test event. Remove me", state="TODO")
         # sched_date = EventDate(now + dt.timedelta(minutes=20), DateType.SCHEDULED)
         # event.add_date(sched_date)
         # self.scheduler.every(5).seconds.do(self.send_notice, event)
 
-        print("Scheduling notifications")
         for notify_period in self.notify_periods:
             # Calculate window
             wnd_start = now + dt.timedelta(minutes=notify_period)
             wnd_end = wnd_start + dt.timedelta(minutes=window_size)
             wnd_start = max(wnd_start, self.notify_positions[notify_period])
-            print(notify_period, wnd_start, '--', wnd_end, 'last:',
-                  self.notify_positions[notify_period])
+
             last_scheduled = wnd_start
             for event in self.calendar.events:
                 date = event.relevant_date.sort_date
@@ -124,7 +122,7 @@ class CalendarCore(AssistantPlugin):
             base_path = os.path.join(base_path, 'templates')
             path = os.path.join(base_path, filename)
             try:
-                print("Trying template:", path)
+                log.debug("Trying template: %s", path)
                 with open(path) as handle:
                     handle.read()
             except IOError:
@@ -137,7 +135,6 @@ class CalendarCore(AssistantPlugin):
 
 
     def register(self):
-
         self.calendar = Calendar(self.agenda_path)
 
         # Register calendar in global state - this is our public API
@@ -152,7 +149,7 @@ class CalendarCore(AssistantPlugin):
     def handle_agenda(self, message):
         "Respond with an agenda on agenda command"
         agenda = self.get_agenda()
-        print("Returning agenda:", agenda)
+        log.debug("Sending agenda: %r", agenda)
         message.respond(agenda)
 
     def get_agenda(self):

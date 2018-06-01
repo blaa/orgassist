@@ -1,21 +1,35 @@
 ---
 
-log:
-  level: INFO
-
 bots:
   # XMPP account configuration
   xmpp:
     jid: 'botjid@domain.com'
     password: 'password'
 
+    # If not given will be determined from SRV records of JID domain
+    ip: null
+    port: null
+    #http_proxy:
+    #  host: 'some.proxy.domain'
+    #  port: 8080
+    #  username: null
+    #  password: null
+
+    # FUTURE: socks support. Doesn't work yet.
+    #socks_proxy:
+    #  host: '127.0.0.1'
+    #  port: 8080
+
   # FUTURE:
   #irc:
   #  server: ...
   #  nickname: ...
 
-# FUTURE: Register external plugins, not conveyed in orgassist package.
-register_plugins: []
+# Register external plugins, not conveyed in orgassist package.
+# Remember to configure them in the assistant configuration.
+#plugins_path: ~/orgassist_plugins
+#plugins:
+#  - owa
 
 # Multiple assistants handling different plugins, org directories, etc, at the
 # same time are possible each for a different bosses.
@@ -102,3 +116,29 @@ assistants:
       #  panic:
       #    shell: 'sudo poweroff'
 
+
+# Logging configuration
+log:
+  formatters:
+    default:
+      format: '%(asctime)s %(levelname)-8s %(name)-15s %(message)s'
+      datefmt: '%Y-%m-%d %H:%M:%S'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: default
+      stream: ext://sys.stdout
+    file:
+      class: logging.handlers.RotatingFileHandler
+      formatter: default
+      filename: orgassist.log
+  loggers:
+    orgassist:
+      level: DEBUG
+      handlers: [console, file]
+    sleekxmpp:
+      level: ERROR
+      handlers: [console]
+    root:
+      level: INFO
+      handlers: [console]

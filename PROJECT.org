@@ -1,6 +1,8 @@
 #+TITLE: OrgAssist project management
 
 * Tasks
+** TODO Show nice info when config file can't be found
+
 ** DONE Fill calendar state with events from org-mode
    CLOSED: [2018-05-30 Wed 18:47]
 ** DONE Handle agenda generation from events in the calendar

@@ -13,17 +13,18 @@ class Config:
     Nice API for a configuration
     """
 
-    def __init__(self, data, partial=None):
+    def __init__(self, data, partial=None, path=None):
         "Create config out of dictionary"
         self._data = data
         self._partial = partial
+        self._config_path = path
 
     @staticmethod
     def from_file(path):
         "Create config by reading a file"
         with open(path) as f:
             data = yaml.load(f)
-        return Config(data)
+        return Config(data, path=path)
 
     def get(self, key, default=None, required=True,
             assert_type=None, wrap=True):
@@ -66,7 +67,7 @@ class Config:
         if wrap is True:
             # Wrap dictionaries
             if isinstance(value, dict):
-                return Config(value, partial=key)
+                return Config(value, partial=key, path=self._config_path)
 
             # Wrap lists of dictionaries
             elif isinstance(value, list):
@@ -74,30 +75,42 @@ class Config:
                     return value
                 if set(type(el) for el in value) == {dict}:
                     return [
-                        Config(element, partial='%s[%d]' % (key, i))
+                        Config(element, partial='%s[%d]' % (key, i), path=self._config_path)
                         for i, element in enumerate(value)
                     ]
         return value
+
+    def interpret_path(self, path):
+        """
+        Paths are relative to the config file and can use ~ to refer to HOME
+        """
+        path = os.path.expanduser(path)
+        path = os.path.join(self._config_path, path)
+        return path
 
     def get_path(self, key, default=None, required=True):
         "Get a path from config. Expand user ~, $HOME variables"
         value = self.get(key, default=default,
                          required=required, assert_type=str)
         if value is not None:
-            value = os.path.expanduser(value)
+            value = self.interpret_path(value)
         return value
 
     def items(self, wrap=True):
         "Dict-like interface with wrapping"
         for key, value in self._data.items():
             if isinstance(value, dict) and wrap:
-                yield (key, Config(value, partial=key))
+                yield (key, Config(value, partial=key, path=self._config_path))
             else:
                 yield (key, value)
 
     def __iter__(self):
         "Allow casting config to dictionary"
         return self._data.items().__iter__()
+
+    def __bool__(self):
+        "For checking if config is empty"
+        return bool(self._data)
 
     def _key_desc(self, key):
         "Describe key correctly, even if config is partial"
