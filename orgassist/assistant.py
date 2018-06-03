@@ -39,7 +39,6 @@ class Assistant:
         # List of callbacks to call boss when initiating communication
         self.boss_channels = []
 
-        self._validate_config()
         self._initialize_plugins()
 
     def _initialize_plugins(self):
@@ -63,12 +62,6 @@ class Assistant:
         # After all plugins are created - initialize plugins
         for plugin in self.plugins.values():
             plugin.initialize()
-
-
-    def _validate_config(self):
-        "Simple config validation - fail early"
-        self.config.get('plugins')
-        self.config.get('channels')
 
     def register_xmpp_bot(self, bot):
         """

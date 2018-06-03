@@ -1,4 +1,4 @@
-#+TITLE: OrgAssist project management
+ #+TITLE: OrgAssist project management
 
 * Bugs
 ** TODO Make sleekxmpp work over socks proxy or over tunneled port
@@ -24,7 +24,6 @@
 ** TODO Add a "search" command                                          :CAL:
    - Search through all events in the calendar.
    - Narrow down in consecutive queries, helm-like.
-** TODO Implement a check for never-read config variables.
 ** TODO Implement a shell "execute" plugin
    Avoid shell-expansions etc. Try to keep it safe.
 ** TODO Notify user life about agenda changes                           :CAL:
@@ -66,12 +65,16 @@
 ** TODO Create functions for human readable date printing
    - in 2 days, in 2 hours, 2 days ago, etc.
    - for scheduling: 2d, 2h, 1w2d.
+** TODO Disambiguation using 'plugin:' prefix for commands.
 
 * Half-baked ideas
 ** Communication plugins
 *** Facebook messenger bot
     email/password approach:
     https://github.com/carpedm20/fbchat
+
+    sleekxmpp approach:
+    https://stackoverflow.com/questions/16902171/send-a-facebook-message-with-xmpp-using-access-tokens-in-python
 *** IRC plugin
     - Watchout for spoofing: Detect boss by it's address, not only a nickname.
 **** Choose a library
@@ -86,11 +89,16 @@
 
 *** REST interface
     - Use API key to identify boss?
+    - Local interface for easier integrations?
+
+*** Android notification system
+    https://pushover.net/
 
 ** When notyfing try to group messages                                  :CAL:
    or maybe always show also "next after that" event?
 ** Integrate with home automation
    Like: https://github.com/home-assistant/home-assistant
+** Forward notifications from weechat.
 ** Weather plugin: based on wttr.in or direct weather source.
    https://github.com/chubin/wttr.in
    #+begin_src
@@ -136,6 +144,8 @@
   #+end_src
 
 * Closed / Archive
+** DONE Implement a check for never-read config variables.
+   CLOSED: [2018-06-03 Sun 16:04]
 ** DONE Handle open states correctly in event creation                  :ORG:
    CLOSED: [2018-06-02 Sat 11:24]
    Pass list of states from config.

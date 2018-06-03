@@ -85,8 +85,8 @@ class OrgPlugin(AssistantPlugin):
             'resilient': False,
         }
 
-        self.note_template_path = self.config.get_path('note_template_path',
-                                                       required=False)
+        self.new_note_path = self.config.get_path('note.template',
+                                                  required=False)
 
 
     def handle_note(self, message):

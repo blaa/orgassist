@@ -46,7 +46,8 @@ def setup_logging(cfg):
     full_config = cfg.get('log',
                           required=False,
                           default={},
-                          assert_type=dict)
+                          assert_type=dict,
+                          wrap=False)
     if full_config:
         full_config = dict(full_config)
         full_config['version'] = 1
@@ -119,6 +120,13 @@ def setup(args):
 
         assistants.append(assistant)
 
+    unused = cfg.get_unused()
+    if unused:
+        print('The following config keys were unused and can be mistyped:')
+        for key in unused:
+            print("  -", key)
+
+
     return {
         'xmpp_bot': xmpp_bot,
         'assistants': assistants,
@@ -131,10 +139,10 @@ def main_loop(program):
     while True:
         program['scheduler'].run_pending()
         idle = program['scheduler'].idle_seconds
-        # Sleep at most 30 seconds; bot communication works in separate
+        # Sleep at most ~30 seconds; bot communication works in separate
         # thread and while we are sleeping user might cause action which
         # schedules something.
-        idle = min(30, idle)
+        idle = min(33, idle)
         orgassist.log.debug("Scheduler sleeping %.1f seconds", idle)
         sleep(idle)
         program['scheduler'].run_pending()
