@@ -126,7 +126,6 @@ def setup(args):
         for key in unused:
             print("  -", key)
 
-
     return {
         'xmpp_bot': xmpp_bot,
         'assistants': assistants,
@@ -145,7 +144,14 @@ def main_loop(program):
         idle = min(33, idle)
         orgassist.log.debug("Scheduler sleeping %.1f seconds", idle)
         sleep(idle)
-        program['scheduler'].run_pending()
+        try:
+            program['scheduler'].run_pending()
+        except:
+            # In case something bad happens - boss should know.
+            # For example a notification might not reach him in time.
+            for assistant in program['assistants']:
+                assistant.tell_boss("Scheduler just threw an exception - help me.")
+            raise
 
 
 def main():

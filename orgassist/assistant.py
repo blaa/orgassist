@@ -1,5 +1,6 @@
 from orgassist.config import ConfigError
 from orgassist import log, templates
+from orgassist import helpers
 
 """
 Assistant class and assistant plugin interfaceo
@@ -25,12 +26,16 @@ class Assistant:
         self.scheduler = scheduler
         self.config = config
 
+        # Time-related helpers
+        self.time = helpers.Time()
+
         # Instances of plugins
         self.plugins = {}
 
         # Global assistant state to let plugins cooperate
         self.state = {}
 
+        # TODO: Refactor command parser out of assistant class.
         # Commands registered by plugins for dispatching
         # {command1: callback1, command2: callback1,
         #  command3: callback2 }
@@ -45,7 +50,6 @@ class Assistant:
         "Create instances of plugins"
         # {name: handler1, name2: handler1, name3: handler2, ...}
         plugins = self.config.get('plugins', assert_type=dict)
-
         for plugin_name, plugin_config in plugins.items():
             plugin_cls = Assistant.registered_plugins.get(plugin_name, None)
             if plugin_cls is None:
@@ -53,7 +57,8 @@ class Assistant:
                                   plugin_name)
 
             plugin = plugin_cls(self, plugin_config,
-                                self.scheduler, self.state)
+                                self.scheduler,
+                                self.time, self.state)
             plugin.validate_config()
             plugin.register()
             self.plugins[plugin_name] = plugin
@@ -119,10 +124,12 @@ class Assistant:
         """
         Handle command sent by the Boss.
         """
-        command = message.text.split()[0]
-        command = command.lower().strip()
+        command_raw = message.text.split()[0]
+        command = command_raw.lower().strip()
         handler = self.commands.get(command, None)
         if handler is not None:
+            # Prepare a message without a command.
+            message.strip_command(command_raw)
             handler(message)
         else:
             message.respond(templates.get('DONT_UNDERSTAND'))
@@ -157,17 +164,19 @@ class AssistantPlugin:
     for_all[validate_config -> register] -> for_all[initialize]
     """
 
-    def __init__(self, assistant, config, scheduler, state):
+    def __init__(self, assistant, config, scheduler, time, state):
         """
         Args:
           assistant: Connected assistant object
           config: Part of config which is relevant to the plugin
           scheduler: Common scheduler which gets executed in the main loop
           state: a state shared between the plugins.
+          time: time helpers
         """
         self.config = config
         self.scheduler = scheduler
         self.assistant = assistant
+        self.time = time
         self.state = state
 
     def register(self):

@@ -78,17 +78,19 @@ class Config:
                 return Config(value, partial=key_full,
                               path=self._config_path, base=self._base)
 
-            # Wrap lists of dictionaries (or handle an empty list)
+            # Wrap non-empty lists of dictionaries
             elif isinstance(value, list):
                 types_inside = set(type(el) for el in value)
-                if not value or types_inside == {dict}:
+                if types_inside == {dict}:
                     return [
                         Config(element, partial='%s[%d]' % (key_full, i),
                                path=self._config_path, base=self._base)
                         for i, element in enumerate(value)
                     ]
 
+
         # Direct, or unwrapped access - mark
+        # Will handle an empty list case too.
         # It's our class. Stupid.
         # pylint: disable=protected-access
         self._base._mark(key, self._partial)
@@ -100,7 +102,8 @@ class Config:
         Paths are relative to the config file and can use ~ to refer to HOME
         """
         path = os.path.expanduser(path)
-        path = os.path.join(self._config_path, path)
+        path = os.path.join(os.path.dirname(self._config_path), path)
+        path = os.path.abspath(path)
         return path
 
     def get_path(self, key, default=None, required=True):
@@ -139,11 +142,10 @@ class Config:
             for key, value in level.items():
                 key_full = "%s.%s" % (partial, key) if partial else key
 
-                if key in self._marked:
+                if key_full in self._marked:
                     # This key was used; direct value read
                     # or unwrapped dictionary read.
                     continue
-
                 if isinstance(value, dict):
                     # Check access level deeper.
                     analyze_level(value, key_full)

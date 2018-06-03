@@ -2,13 +2,11 @@
 Glue between a calendar and other plugins and bot commands.
 """
 
-import os
 import datetime as dt
 import traceback as tb
 import schedule
 
 from orgassist import log
-from orgassist.config import ConfigError
 from orgassist.assistant import Assistant, AssistantPlugin
 from orgassist.calendar import Calendar
 from orgassist import helpers
@@ -27,7 +25,7 @@ class CalendarCore(AssistantPlugin):
         # When scheduling notifications, store time of last scheduled event so
         # it won't be scheduled again. Do it separately for each
         self.notify_positions = {
-            delta: dt.datetime.now() + dt.timedelta(minutes=delta)
+            delta: self.time.now() + dt.timedelta(minutes=delta)
             for delta in self.notify_periods
         }
 
@@ -52,7 +50,7 @@ class CalendarCore(AssistantPlugin):
         # Prepare incoming notifications up to 5 minutes before
         window_size = 5
 
-        now = dt.datetime.now()
+        now = self.time.now()
 
         # FIXME: EXPERIMENT, REMOVE.
         # from orgassist.calendar import Event, EventDate, DateType
@@ -82,7 +80,7 @@ class CalendarCore(AssistantPlugin):
                     continue
 
                 log.info("Scheduling %dm notification for event %r", notify_period, event)
-                delta = (date - dt.datetime.now()).total_seconds() - notify_period * 60
+                delta = (date - self.time.now()).total_seconds() - notify_period * 60
                 self.scheduler.every(delta).seconds.do(self.send_notice, event)
                 last_scheduled = max(last_scheduled, date)
 
@@ -119,8 +117,10 @@ class CalendarCore(AssistantPlugin):
         self.notice_path = cfg.get_path('agenda.notice_template_path',
                                         required=False)
 
-        self.agenda_path = helpers.get_default_template(self.agenda_path or 'agenda.txt.j2', __file__)
-        self.notice_path = helpers.get_default_template(self.notice_path or 'notice.txt.j2', __file__)
+        self.agenda_path = helpers.get_default_template(self.agenda_path or 'agenda.txt.j2',
+                                                        __file__)
+        self.notice_path = helpers.get_default_template(self.notice_path or 'notice.txt.j2',
+                                                        __file__)
 
 
     def register(self):
@@ -143,7 +143,7 @@ class CalendarCore(AssistantPlugin):
 
     def get_agenda(self):
         "Generate agenda"
-        now = dt.datetime.now()
+        now = self.time.now()
         horizon_unfinished = now - dt.timedelta(hours=self.horizon_unfinished)
         horizon_incoming = now + dt.timedelta(hours=self.horizon_incoming)
 

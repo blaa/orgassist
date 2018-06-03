@@ -14,7 +14,8 @@
 *** TODO Easily switch jinja templates
     Possibly - use gettext within Jinja templates.
 *** TODO Use gettext for short messages.
-** TODO Implement a "note" command.                                     :ORG:
+** DONE Implement a "note" command.                                     :ORG:
+   CLOSED: [2018-06-03 Sun 22:58]
    - Start by appending a jinja template to inbox file.
 ** Improve Agenda                                                       :CAL:
 *** TODO Show tasks "planned" for today.
@@ -66,6 +67,7 @@
    - in 2 days, in 2 hours, 2 days ago, etc.
    - for scheduling: 2d, 2h, 1w2d.
 ** TODO Disambiguation using 'plugin:' prefix for commands.
+** TODO Don't use naive datetimes, handle timezones or at least prepare for it.
 
 * Half-baked ideas
 ** Communication plugins

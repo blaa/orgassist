@@ -89,12 +89,27 @@ assistants:
           # Place to store notes
           inbox: ~/.org/assistant.org
 
-          # Auto schedule for evening the same day - so you can go through them
-          # evening, null
-          auto_schedule: 'evening'
+          # Where to place the new event?
+          # - 'append' - to the end of file
+          # - FUTURE: 'child:headline' - as a first child of an entry given by headline
+          position: append
+
+          # Add a tag maybe?
+          tag: NEW
+
+          # Use default, or override with yours:
+          # template: ~/.org/new_note.txt.j2
+
+          # Auto schedule for the same day - so you will remember to go through
+          # them.
+          # - false/null - don't schedule.
+          # - today:hh:mm - schedule for specified time today.
+          # - tomorrow:hh:mm - schedule for specified time tomorrow.
+          # - today or tomorrow - schedule for a whole day.
+          auto_schedule: 'today:22:30'
 
           # FUTURE: Use git on ORG repositories (commit after each change)
-          git_commit: true
+          # git_commit: true
 
         # Rescan org tree and gather data
         scan_interval_s: 300
