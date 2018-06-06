@@ -1,6 +1,7 @@
 import random
 import io
 import datetime as dt
+import pytz
 
 import unittest
 
@@ -46,14 +47,18 @@ ORG_CONFIG = {
     'project': 'PROJECT',
 
     'resilient': False,
+
+    'timezone': pytz.timezone('UTC'),
 }
 
 class TestOrg(unittest.TestCase):
     "Test org mode reading"
 
     def setUp(self):
+        self.utc = pytz.timezone('UTC')
         today = dt.datetime.now().replace(hour=random.randint(6, 10),
                                           minute=random.randint(0, 59))
+        today = self.utc.localize(today)
 
         yesterday = today - dt.timedelta(days=1)
         tomorrow = today + dt.timedelta(days=1)

@@ -1,3 +1,4 @@
+import pytz
 import unittest
 import random
 import datetime as dt
@@ -11,8 +12,7 @@ class TestEvent(unittest.TestCase):
     Test Event and EventDates helpers.
     """
 
-    @staticmethod
-    def day_starts():
+    def day_starts(self):
         """
         Early day date.
 
@@ -22,8 +22,10 @@ class TestEvent(unittest.TestCase):
         This relavancy system might work bad for people working graveyard
         shifts.
         """
-        return dt.datetime.now().replace(hour=random.randint(6, 10),
-                                         minute=random.randint(0, 59))
+        self.utc = pytz.timezone('UTC')
+        morning = dt.datetime.now().replace(hour=random.randint(6, 10),
+                                            minute=random.randint(0, 59))
+        return self.utc.localize(morning)
 
     def create_dates(self):
         "Shared dates. A bit of ugly code to have low number of repetitions"
@@ -52,10 +54,10 @@ class TestEvent(unittest.TestCase):
                                           DateType.TIMESTAMP)
 
         dates.task_today = EventDate(now.date(),
-                                     DateType.SCHEDULED)
+                                     DateType.SCHEDULED, self.utc)
 
         dates.deadline_yesterday = EventDate((now - dt.timedelta(days=1)).date(),
-                                             DateType.SCHEDULED)
+                                             DateType.SCHEDULED, self.utc)
 
         dates.start_date = now + dt.timedelta(minutes=10)
         dates.end_date = now + dt.timedelta(days=3)
@@ -115,7 +117,7 @@ class TestEvent(unittest.TestCase):
 
         # Schedule the event for today.
         now = self.day_starts()
-        sched_date = EventDate(now.date(), DateType.SCHEDULED)
+        sched_date = EventDate(now.date(), DateType.SCHEDULED, self.utc)
         event.add_date(sched_date, relative_to=now)
 
         self.assertTrue(DateType.SCHEDULED in event.date_types)
@@ -178,7 +180,8 @@ class TestEvent(unittest.TestCase):
         scheduled = calendar.get_scheduled(horizon_incoming, relative_to=dates.now)
         agenda = calendar.get_agenda(horizon_incoming=horizon_incoming,
                                      horizon_unfinished=horizon_unfinished,
-                                     list_unfinished_appointments=True)
+                                     list_unfinished_appointments=True,
+                                     relative_to=dates.now)
 
         print("AGENDA:", type(agenda), agenda, "END")
         #self.assertGreaterEqual(len(unfinished), 2)

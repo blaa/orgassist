@@ -3,7 +3,7 @@ Build configuration
 """
 import setuptools
 
-VERSION = (0, 3, 0)
+VERSION = (0, 4, 0)
 
 with open("README.md", "r") as handler:
     LONG_DESC = handler.read()
@@ -25,9 +25,15 @@ setuptools.setup(
         'PyYAML==3.12',
         'dnspython==1.15.0',
         'sleekxmpp==1.3.3',
-        'schedule==0.5.0',
-        'Jinja2==2.10',
+        'schedule>=0.5.0',
+        'Jinja2>=2.10',
+        'pytz>=2018.4',
     ],
+    extras_require={
+        'exchange_plugin':  [
+            "pyexchange==0.6"
+        ],
+    },
     license="MIT",
     classifiers=[
         "Development Status :: 3 - Alpha",

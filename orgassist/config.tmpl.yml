@@ -134,6 +134,25 @@ assistants:
         # FUTURE: Anonymize the contents of entries with one of this tags
         private_tags: ['PRIVATE', 'PRIV', 'SECRET']
 
+      # Exchange integration plugin - requires pyexchange module.
+      # exch:
+      #   # URL to company exchange/EWS
+      #   url: 'https://yourcompany.lan/EWS/Exchange.asmx'
+
+      #   # Domain login
+      #   username: 'DOMAIN\name.surname'
+      #   password: 'domain_password'
+
+      #   # Optional CA cert.
+      #   ca_path: 'company_ca.crt'
+
+      #   # Detects which meetings are held by you.
+      #   my_email: 'name.surname@domain'
+
+      #   # Hours
+      #   horizon_incoming: 72
+
+
 
       # Generic command plugin
       #command:

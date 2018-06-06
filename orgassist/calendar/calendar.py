@@ -58,7 +58,7 @@ class Calendar:
 
     def get_unfinished(self, horizon,
                        list_unfinished_appointments,
-                       relative_to=None):
+                       relative_to):
         """
         Get a list of past unfinished events
 
@@ -67,9 +67,6 @@ class Calendar:
           relative_to (datetime): The relative "now" time.
           list_unfinished_appointments (bool): Return all open or just scheduled.
         """
-        if relative_to is None:
-            relative_to = dt.datetime.now()
-
         print("GET UNFINISHED")
         unfinished = []
         for event in self.events:
@@ -122,7 +119,7 @@ class Calendar:
             appointments.append(event)
         return appointments
 
-    def get_scheduled(self, horizon, relative_to=None):
+    def get_scheduled(self, horizon, relative_to):
         "Get tasks scheduled or deadlining in given period"
 
         print("GET SCHEDULED")
@@ -147,10 +144,8 @@ class Calendar:
         return scheduled
 
     def get_agenda(self, horizon_incoming, horizon_unfinished,
-                   list_unfinished_appointments, relative_to=None):
+                   list_unfinished_appointments, relative_to):
         "Generate agenda in a text format"
-        if relative_to is None:
-            relative_to = dt.datetime.now()
 
         log.info("Getting agenda from %r to %r",
                  horizon_unfinished, horizon_incoming)
