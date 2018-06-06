@@ -33,7 +33,7 @@ class CalendarCore(AssistantPlugin):
         "Notify user in advance about incoming event."
         # Read just-in-time so it can be updated without restarting.
         template = helpers.get_template(self.notice_path)
-        notice = event.format_notice(template)
+        notice = event.format_notice(template, self.time.now())
 
         self.assistant.tell_boss(notice)
 

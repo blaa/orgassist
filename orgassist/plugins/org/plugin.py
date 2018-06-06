@@ -11,12 +11,15 @@ Works for me though.
 (C) 2018 by Tomasz bla Fortuna
 """
 import datetime as dt
+import pytz
+
 from orgassist import log
 from orgassist.assistant import Assistant, AssistantPlugin
 from orgassist.config import ConfigError
 
 from . import helpers
 from orgassist.helpers import get_template, get_default_template
+
 
 @Assistant.plugin('org')
 class OrgPlugin(AssistantPlugin):
@@ -39,8 +42,7 @@ class OrgPlugin(AssistantPlugin):
             if event.relevant_date is not None
         ]
 
-        self.state['calendar'].del_events('org')
-        self.state['calendar'].add_events(events, 'org')
+        self.state['calendar'].update_events(events, 'org')
         return events
 
     def register(self):
@@ -64,6 +66,9 @@ class OrgPlugin(AssistantPlugin):
             # Include those files (full path)
             'files': self.config.get('files', default=[]),
 
+            # Timezone of org files.
+            'timezone': self.config.get('timezone', default='UTC', assert_type=str),
+
             # Scan given base for all files matching regexp
             'files_re': self.config.get('org_regexp', default=r'.*\.org$'),
             'base': self.config.get_path('directory'),
@@ -73,7 +78,8 @@ class OrgPlugin(AssistantPlugin):
             #'horizont_past': self.config.get('agenda.horizont_past', default=10),
 
             'todos_open': self.config.get('todos.open', default=['TODO']),
-            'todos_closed': self.config.get('todos.closed', default=['DONE', 'CANCELLED']),
+            'todos_closed': self.config.get('todos.closed',
+                                            default=['DONE', 'CANCELLED']),
 
             # Hide body and headline of those - keep date.
             'tags_private': self.config.get('private_tags', default=[]),
@@ -86,6 +92,7 @@ class OrgPlugin(AssistantPlugin):
             # This should be fixed in orgnode.
             'resilient': False,
         }
+        self.parsed_config['timezone'] = pytz.timezone(self.parsed_config['timezone'])
 
         self.note_inbox = self.config.get_path('note.inbox',
                                                required=False)

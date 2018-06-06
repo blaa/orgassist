@@ -28,6 +28,12 @@ class Calendar:
         "Add new events to the calendar"
         for event in events:
             event.meta['calendar_tag'] = internal_tag
+
+            # sort_dates can't be naive
+            date = event.relevant_date.sort_date
+            if isinstance(date, dt.datetime):
+                if date.tzinfo is None:
+                    raise Exception("Trying to add a naive datetime - use time.localize")
         self.events += events
         self.events.sort()
 
@@ -35,13 +41,20 @@ class Calendar:
         "Delete events by internal tag"
         if internal_tag is None:
             self.events = []
-
         else:
             self.events = [
                 event
                 for event in self.events
                 if event.meta['calendar_tag'] != internal_tag
             ]
+
+    def update_events(self, events, internal_tag):
+        """
+        Replace tagged events and send notifications on new events.
+        """
+        # TODO: Detect and send notifications
+        self.del_events(internal_tag)
+        self.add_events(events, internal_tag)
 
     def get_unfinished(self, horizon,
                        list_unfinished_appointments,

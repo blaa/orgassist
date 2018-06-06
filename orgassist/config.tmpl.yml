@@ -49,6 +49,9 @@ assistants:
         # irc_nick:
       #- jid: 'multiple.controllers.possible@domain.com'
 
+    # Timezone in which events are kept and rendered in agenda, etc.
+    timezone: 'UTC'
+
     # Naming a plugin in config enables is.
     plugins:
       # A common calendar/agenda plugin - dependency of org.
@@ -80,6 +83,9 @@ assistants:
         directory: ~/.org/
         # Regexp to identify org-mode files in the directory
         org_regexp: '[^.].*\.org$'
+
+        # Timezone in which you keep your org files
+        timezone: 'UTC'
 
         # Additional files (full paths)
         files: []

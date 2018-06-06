@@ -99,7 +99,6 @@ def load_orgnode(cfg):
                     first = False
                     continue
                 raise
-
     return db
 
 def orgnode_to_event(node, org_config, relative_to=None):
@@ -116,20 +115,21 @@ def orgnode_to_event(node, org_config, relative_to=None):
         event.priority = node.priority
 
     if node.scheduled:
-        date = EventDate(node.scheduled, DateType.SCHEDULED)
+        date = EventDate(node.scheduled, DateType.SCHEDULED, org_config['timezone'])
         event.add_date(date, relative_to)
 
     if node.deadline:
-        date = EventDate(node.deadline, DateType.DEADLINE)
+        date = EventDate(node.deadline, DateType.DEADLINE, org_config['timezone'])
         event.add_date(date, relative_to)
 
     for ranged in node.rangelist:
-        date = EventDate(ranged, DateType.RANGE)
+        start, end = ranged
+        date = EventDate((start, end), DateType.RANGE, org_config['timezone'])
         event.add_date(date, relative_to)
 
     for node_date in node.datelist:
         # Appointment dates
-        date = EventDate(node_date, DateType.TIMESTAMP)
+        date = EventDate(node_date, DateType.TIMESTAMP, org_config['timezone'])
         event.add_date(date, relative_to)
 
     return event
@@ -217,7 +217,6 @@ def get_totals_stat(db, cfg):
             count_open += 1
 
     return count_open, count_total
-
 """
 
 def get_incoming(db, cfg):

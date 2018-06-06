@@ -23,8 +23,12 @@ class EventDate:
     Handle operations on a date, distinguishes different date types, date
     ranges and cyclic dates.
     """
-    def __init__(self, date, date_type):
-        # Date is an appointment if has hour and minutes.
+    def __init__(self, date, date_type, timezone=None):
+        """
+        For time-less dates, or naive datetime passing timezone is obligatory.
+        """
+
+        # Date is an appointment if it has hour and minutes.
         self.appointment = False
 
         # Handle ranges almost normally.
@@ -37,15 +41,35 @@ class EventDate:
         self.date_type = date_type
         assert date_type in DateType
 
+        self.timezone = timezone
+
+        # Ensure dates aren't naive
+        self.date = self._localize(self.date, timezone)
+        self.date_end = self._localize(self.date_end, timezone)
+
         # Sortable version, always with a time.
         if not isinstance(self.date, dt.datetime):
+            assert timezone is not None, "When creating a time-less date, pass a timezone"
             self.sort_date = dt.datetime(self.date.year,
                                          self.date.month,
                                          self.date.day,
                                          23, 59, 59)
+            self.sort_date = self._localize(self.sort_date, timezone)
         else:
             self.sort_date = self.date
             self.appointment = True
+
+    @staticmethod
+    def _localize(date, timezone):
+        "Localize datetimes, keep dates"
+        if date is None:
+            return None
+        if isinstance(date, dt.datetime) and date.tzinfo is None:
+            if timezone is None:
+                raise Exception("Passing timezone is obligatory.")
+            return timezone.localize(date)
+        else:
+            return date
 
     def __lt__(self, event_date):
         "Compare dates"
@@ -71,7 +95,7 @@ class EventDate:
         - And use a "smaller" tuple.
         """
         if relative_to is None:
-            relative_to = dt.datetime.now()
+            relative_to = self.timezone.localize(dt.datetime.now())
 
         # Future is positive
         delta_this = (self.sort_date - relative_to).total_seconds()

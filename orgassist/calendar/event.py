@@ -106,7 +106,7 @@ class Event:
         self.tags.update(tags)
         return self
 
-    def format_notice(self, template):
+    def format_notice(self, template, relative_to):
         """
         Render a notice about this event using given template.
 
@@ -114,10 +114,9 @@ class Event:
         can override this method.
         """
         # Jinja context
-        now = dt.datetime.now()
 
         # Calculate time delta in conscise human-readable way
-        delta_s = (self.relevant_date.sort_date - now).total_seconds()
+        delta_s = (self.relevant_date.sort_date - relative_to).total_seconds()
 
         delta_h = delta_s // 60 // 60
         delta_s -= delta_h * 60 * 60
@@ -134,7 +133,7 @@ class Event:
         delta_str += '%dm' % delta_m if delta_m > 0 or delta_h > 0 else ''
 
         ctx = {
-            'now': now,
+            'now': relative_to,
             'event': self,
             'delta_str': delta_str,
 

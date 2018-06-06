@@ -3,17 +3,21 @@ Abstract access to the datetime so it will be easier to implement timezones
 later.
 """
 
+import pytz
 import datetime as dt
 
 class Time:
     """
     Time related helpers
     """
-    def __init__(self, timezone='local'):
-        self.timezone = timezone
+    def __init__(self, timezone='UTC'):
+        self.timezone = pytz.timezone(timezone)
 
-    @staticmethod
-    def now():
+    def now(self):
         "Return current time with local timezone"
-        # TODO: Timezones
-        return dt.datetime.now()
+        local_time = dt.datetime.now()
+        return self.timezone.localize(local_time)
+
+    def normalize(self, date):
+        "Normalize given date to main date"
+        return self.timezone.normalize(date)

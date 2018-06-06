@@ -8,7 +8,6 @@ from orgassist import helpers
 
 from orgassist.assistant import CommandDispatch
 
-
 class Assistant:
     """
     Assistant keeps a state of a single communication.
@@ -30,7 +29,9 @@ class Assistant:
         self.command = CommandDispatch(self)
 
         # Time-related helpers
-        self.time = helpers.Time()
+        timezone = self.config.get('timezone',
+                                  default='UTC', assert_type=str)
+        self.time = helpers.Time(timezone)
 
         # Instances of plugins
         self.plugins = {}
