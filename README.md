@@ -6,18 +6,22 @@ sources of notifications and use multiple different communication interfaces -
 by default XMPP.
 
 Currently working functions include:
-- Sending notifications over XMPP in advance before appointments.
-- Generating and sending over XMPP an agenda for a current day.
-- Requesting agenda by a command.
+- Bidirectional communication over XMPP.
+- Notifying in advance about planned appointments.
+- Generating and sending an agenda for the current day.
+- Reading events from org-mode tree (schedules, deadlines, appointments)
+- Reading events from Exchange calendar.
+- Taking notes and storing in an org-mode inbox file.
 
-It's architected to be easily expandable, but by design handles:
-- org-mode directory structure with deadlines, scheduled tasks and agendas.
-- XMPP interface to read commands and send notifications.
-- FUTURE: other bot-interfaces: irc interface, email interface, web interface,
-  android push-notification interface.
-- FUTURE: taking notes directly into the inbox file inside the org tree.
-- FUTURE: Outlook (OWA) calendar integration to get integrated notification
-  stream.
+It's architected to be easily expandable, currently planned features:
+- other bot-interfaces: irc interface, email interface, web interface,
+  android push-notification interface,
+- caldav integration,
+- rescheduling tasks and snoozing notifications using remote commands,
+- intelligent capturing which handles tags and dates,
+- changing task state,
+- incremental search,
+- etc.
 
 
 But why?
@@ -43,28 +47,29 @@ OrgAssist is split into plugins with a well-defined API.
 
 Calendar
 -----------
-Code originally developed in the org plugin, but extracted to allow sharing it's
-functions between all plugins. In general, it handles a list of org-like
-"events" - dated (or not) tasks in various states (TODO, DONE, DELEGATED, etc.)
+It's a "Core" plugin since its existence is a depedency of other plugins.
 
-Can generate notifications for the incoming events and whole-day agendas to
-remind you what you've planned for today.
-
-It's considered a Core plugin as its existence is a depedency of other plugins.
+It manages a list of dated events with a state (TODO, DONE, etc.) in a common
+format. For this events, generates notifications and agenda views.
 
 Org
 -----------
-Reads org files and feeds events into the calendar. FUTURE: Allows you to change
-state of tasks, take a note into an org file, etc.
+Reads org files and feeds events into the calendar. Handles command to take
+notes.
 
-OWA
------------
-FUTURE: Planned plugin to integrate events from a corporate OWA calendar.
+Planned: changing state of tasks, rescheduling, smarter capture.
 
-Shell
+Exchange
 -----------
-FUTURE: Execute a configured command when given a command. Enable/disable
-alarms, control music, etc.
+Fills calendar with events from your company's Exchange. Detects those set by
+you, and with your required and optional attendance.
+
+Planned: detecting new events.
+
+Planned: Shell
+-----------
+Execute a configured shell command on request. Enable/disable alarms, control
+music, etc.
 
 
 Setup
