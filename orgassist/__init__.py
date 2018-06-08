@@ -7,9 +7,8 @@ from . import config
 from . import calendar
 from . import bots
 
-from .assistant import PluginError
-from .assistant import Assistant, AssistantPlugin
-
+from . import assistant
+from .assistant import Assistant
 
 # Register commands
 from . import plugins

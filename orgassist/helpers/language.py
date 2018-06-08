@@ -7,6 +7,8 @@ _templates = {
         "Sorry?",
         "Can you repeat?",
     ],
+    'NO_CONTEXT': "No active context to quit.",
+    'QUIT_CONTEXT': "Out of context: {}",
 }
 
 def get(key):
