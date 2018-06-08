@@ -47,10 +47,12 @@ OrgAssist is split into plugins with a well-defined API.
 
 Calendar
 -----------
-It's a "Core" plugin since its existence is a depedency of other plugins.
+"Core" plugin - required by org and exchange plugin.
 
 It manages a list of dated events with a state (TODO, DONE, etc.) in a common
-format. For this events, generates notifications and agenda views.
+format. For this events, it generates notifications and agenda views.
+
+Planned: Incremental search over events.
 
 Org
 -----------
