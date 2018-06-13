@@ -24,6 +24,9 @@
 *** TODO Show stats of tasks over the horizon
 *** TODO Display optionally tags in agenda view
 *** TODO Display deadline/scheduled state
+*** TODO Position `now' better on ranged appointments.
+    Don't show --now-- after a "ranged" appointment if the next one didn't
+    start, and the ranged - didn't end.
 ** TODO Add a "search" command                                          :CAL:
    - Search through all events in the calendar.
    - Narrow down in consecutive queries, helm-like.
@@ -49,7 +52,8 @@
    And schedule using given date (or treat as appointment?)
 
 * Tasks
-** TODO Settle on a name.
+** DONE Settle on a name.
+   CLOSED: [2018-06-13 Wed 22:10]
    - orgassist is not completely unique name.
    - I'm trying to use gender neutral names.
    - http://www.thesaurus.com/browse/assistant
@@ -57,6 +61,9 @@
      botally, botmate seem taken
    - "orgremote" is technical, but unique.
    - "orgbot" is taken, but seems to be a dead repo.
+
+     Finally: Keeping "OrgAssist".
+     We even got logo! Thanks to TJ.
 
 ** TODO Deploy a work-instance.
 ** TODO Make sure all important stuff gets log.info().
@@ -123,6 +130,9 @@
          `-’      10 km
         /   \     0.4 mm
    #+end_src
+** Jira integration.
+   Read your tasks from Jira. Notify on new, remind on current.
+
 ** Do a RNN natural-language talking bot.
    Pheh. Certainly doable, but makes sense only to let other people talk to your
    bot and schedule an appointment with you without using "commands". Kind of

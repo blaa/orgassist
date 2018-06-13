@@ -104,6 +104,7 @@ class XmppBot:
         message = Message(msg['body'], from_jid.full, respond)
 
         callback(message)
+        message.finish()
 
     def send_message(self, jid, message):
         "Send a message"

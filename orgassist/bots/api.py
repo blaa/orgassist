@@ -11,6 +11,14 @@ class Message:
         "Proxy to respond"
         self._respond(text)
 
+    def finish(self):
+        """
+        Call when current block of calls to respond() is done
+
+        This does nothing for XMPP, but might be used to group multiple
+        messages for other bot interfaces.
+        """
+
     def strip_command(self, command):
         "Strip command-word from the message"
         new_text = self.text.replace(command, '', 1).lstrip()

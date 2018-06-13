@@ -168,4 +168,17 @@ class Event:
         return "<Event %s>" % " ".join(add_up)
 
     def __lt__(self, other):
-        return self.relevant_date < other.relevant_date
+        """
+        By default, "sort" orders from smallest to biggest.
+
+        Read this function as: True, if "self" is more important than "other".
+        """
+        if self.relevant_date is None and other.relevant_date is None:
+            # Compare date-less events by headline.
+            return self.headline < other.headline
+        elif other.relevant_date is None:
+            return True
+        elif self.relevant_date is None:
+            return False
+        else:
+            return self.relevant_date < other.relevant_date

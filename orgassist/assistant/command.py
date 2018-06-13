@@ -78,10 +78,13 @@ class CommandDispatch:
 
         # Context handler has priority
         if self.context is not None:
-            ret = self.context.handler(message)
-            if ret:
+            if not self.context.is_valid():
                 self.context_quit(None)
-            return
+            else:
+                ret = self.context.handler(message)
+                if ret:
+                    self.context_quit(None)
+                return
 
         # Generic command handling
         command_raw = command_raw.split()[0]

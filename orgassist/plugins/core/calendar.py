@@ -11,6 +11,8 @@ from orgassist.assistant import Assistant, AssistantPlugin
 from orgassist.calendar import Calendar
 from orgassist import helpers
 
+from .search import SearchContext
+
 @Assistant.plugin('calendar')
 class CalendarCore(AssistantPlugin):
 
@@ -52,13 +54,6 @@ class CalendarCore(AssistantPlugin):
 
         now = self.time.now()
 
-        # FIXME: EXPERIMENT, REMOVE.
-        # from orgassist.calendar import Event, EventDate, DateType
-        # event = Event("This is a test event. Remove me", state="TODO")
-        # sched_date = EventDate(now + dt.timedelta(minutes=20), DateType.SCHEDULED)
-        # event.add_date(sched_date)
-        # self.scheduler.every(5).seconds.do(self.send_notice, event)
-
         for notify_period in self.notify_periods:
             # Calculate window
             wnd_start = now + dt.timedelta(minutes=notify_period)
@@ -67,6 +62,10 @@ class CalendarCore(AssistantPlugin):
 
             last_scheduled = wnd_start
             for event in self.calendar.events:
+                # Ignore date-less events
+                if event.relevant_date is None:
+                    continue
+
                 date = event.relevant_date.sort_date
                 # We want to schedule an event if it lies between now+notify_period and
                 # now+notify_period+prepare_before
@@ -131,6 +130,7 @@ class CalendarCore(AssistantPlugin):
 
         commands = [
             (['agenda', 'ag'], self.handle_agenda),
+            (['search', 's'], self.handle_search),
         ]
         for aliases, callback in commands:
             self.assistant.command.register(aliases, callback)
@@ -140,6 +140,14 @@ class CalendarCore(AssistantPlugin):
         agenda = self.get_agenda()
         log.debug("Sending agenda: %r", agenda)
         message.respond(agenda)
+
+    def handle_search(self, message):
+        """
+        Enter an incremental search context
+        """
+        ctx = SearchContext(self.calendar)
+        ctx.handler(message)
+        return ctx
 
     def get_agenda(self):
         "Generate agenda"

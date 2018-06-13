@@ -138,11 +138,15 @@ def main_loop(program):
     while True:
         program['scheduler'].run_pending()
         idle = program['scheduler'].idle_seconds
-        # Sleep at most ~30 seconds; bot communication works in separate
+        # Limit wakeups and sleep long. Try to omit short-long sleep
+        # cycles. Don't sleep too long: bot communication works in separate
         # thread and while we are sleeping user might cause action which
         # schedules something.
-        idle = min(33, idle)
-        orgassist.log.debug("Scheduler sleeping %.1f seconds", idle)
+        target = 30
+        if idle > 2 * target:
+            idle = target
+        elif idle > target:
+            idle = idle // 2 + 1
         sleep(idle)
         try:
             program['scheduler'].run_pending()

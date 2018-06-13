@@ -76,6 +76,10 @@ class CommandContext:
         now = time()
         return self._stamp + self._ttl > now
 
+    def invalidate(self):
+        "Immediately invalidate this context"
+        self._ttl = 0
+
     def handler(self, message):
         """
         Handles all messages while in context

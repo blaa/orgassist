@@ -35,13 +35,6 @@ class OrgPlugin(AssistantPlugin):
             for node in db
         ]
 
-        # TODO: Handle TODOs too, not only the appointments/schedules
-        events = [
-            event
-            for event in events
-            if event.relevant_date is not None
-        ]
-
         self.state['calendar'].update_events(events, 'org')
         return events
 

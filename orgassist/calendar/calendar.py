@@ -29,11 +29,12 @@ class Calendar:
         for event in events:
             event.meta['calendar_tag'] = internal_tag
 
-            # sort_dates can't be naive
-            date = event.relevant_date.sort_date
-            if isinstance(date, dt.datetime):
-                if date.tzinfo is None:
-                    raise Exception("Trying to add a naive datetime - use time.localize")
+            # Check: sort_dates can't be naive
+            if event.relevant_date is not None:
+                date = event.relevant_date.sort_date
+                if isinstance(date, dt.datetime):
+                    if date.tzinfo is None:
+                        raise Exception("Trying to add a naive datetime - use time.localize")
         self.events += events
         self.events.sort()
 
@@ -55,6 +56,13 @@ class Calendar:
         # TODO: Detect and send notifications
         self.del_events(internal_tag)
         self.add_events(events, internal_tag)
+
+    def get_planned(self, horizon,
+                    relative_to):
+        """
+        Return a list of tasks scheduled for today
+        """
+        raise NotImplementedError
 
     def get_unfinished(self, horizon,
                        list_unfinished_appointments,
@@ -99,23 +107,18 @@ class Calendar:
         "Get a list of scheduled and planned events"
         appointments = []
 
-        print("GET APPOINTMENTS")
         appointments = []
         for event in self.events:
             # Include only appointments
-            if not event.relevant_date.appointment:
+            if event.relevant_date is None or not event.relevant_date.appointment:
                 continue
 
+            # Check horizon
             date = event.relevant_date.sort_date
-            print("  ", event)
             if date < since:
-                print("    IN PAST")
                 continue
             if date > horizon:
-                print("    OVER HORIZON")
                 break
-
-            print("  GOT YOU")
             appointments.append(event)
         return appointments
 
@@ -160,6 +163,9 @@ class Calendar:
             since -= dt.timedelta(hours=4)
 
         ctx = {
+            # TODO: planned
+            'planned': [],
+
             'unfinished': self.get_unfinished(horizon_unfinished,
                                               list_unfinished_appointments,
                                               relative_to),
