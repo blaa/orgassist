@@ -1,5 +1,5 @@
-What is it?
-===========
+![Project logo](./gfx/logo.png)
+
 "orgassist" is a bot - an assistant who handles your appointments, tasks and
 note-taking when you're away from your computer. It can integrate multiple
 sources of notifications and use multiple different communication interfaces -
@@ -107,12 +107,16 @@ plugins enabled, with different configuration and state.
                     | Assistant 3 ---> etc.
 
 
-License
+License and authors
 =======
 License: MIT License.
 Author: Tomasz Fortuna, 2019.
 Contact: bla@thera.be
 
+Project's beautiful logo was contributed by Ulises (tjulises). It relates to
+the org-mode logo with an added "robot" twist.
+
 Orgassist includes an external MIT-licensed module "orgnode" by Albin Stjerna,
 Takafumi Arakaki, and Charles Cave (https://github.com/albins/orgnode.git).
 Edited by myself to cleanup API and fix some problems.
+
