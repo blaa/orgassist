@@ -22,7 +22,7 @@ setuptools.setup(
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=[
-        'PyYAML==3.12',
+        'PyYAML==5.1',
         'dnspython==1.15.0',
         'sleekxmpp==1.3.3',
         'schedule>=0.5.0',
