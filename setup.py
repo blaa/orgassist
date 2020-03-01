@@ -3,7 +3,7 @@ Build configuration
 """
 import setuptools
 
-VERSION = (0, 5, 0)
+VERSION = (0, 6, 0)
 
 with open("README.md", "r") as handler:
     LONG_DESC = handler.read()
@@ -22,12 +22,11 @@ setuptools.setup(
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=[
-        'PyYAML==5.1',
-        'dnspython==1.15.0',
-        'sleekxmpp==1.3.3',
-        'schedule>=0.5.0',
-        'Jinja2>=2.10',
-        'pytz>=2018.4',
+        'PyYAML==5.3',
+        'sleekxmpp==1.3.1',
+        'schedule>=0.6.0',
+        'Jinja2>=2.11.1',
+        'pytz>=2019.3',
     ],
     extras_require={
         'exchange_plugin':  [

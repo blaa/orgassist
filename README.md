@@ -119,4 +119,3 @@ the org-mode logo with an added "robot" twist.
 Orgassist includes an external MIT-licensed module "orgnode" by Albin Stjerna,
 Takafumi Arakaki, and Charles Cave (https://github.com/albins/orgnode.git).
 Edited by myself to cleanup API and fix some problems.
-

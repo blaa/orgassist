@@ -64,7 +64,7 @@ assistants:
         agenda:
           # When should Agenda be automatically sent?
           times:
-            - '7:00'
+            - '07:00'
             - '12:00'
 
           # Hours to look forward and backward.

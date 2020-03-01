@@ -1,18 +1,12 @@
  #+TITLE: OrgAssist project management
 
-* Bugs
-** TODO Make sleekxmpp work over socks proxy or over tunneled port
-   Currently tunneled port breaks TLS domain checking.
-   Certificate is for SRV record, not for JID domain.
-
-   Update: I lacked pyasn1 on one server and it didn't verify cert there at all.
-   Where: sleekxmpp: cert.py / verify() 
-   gets expected from jid. tries to get srv from cert (but doesn't; and can it?)
-   Maybe my cert is bad but pidgin likes it.
-** DONE Show nice info when config file can't be found
-   CLOSED: [2018-06-02 Sat 19:17]
-** DONE Show '--now--' marker after all the appointments
-   CLOSED: [2018-06-02 Sat 19:15]
+* Changelog
+** 0.6
+*** DONE Upgrade packages
+    Upgraded all dependencies, but downgraded sleekxmpp to "stable" version -
+    1.3.1 to fix TLS errors with Jabber. Ref:
+    https://github.com/fritzy/SleekXMPP/issues/462
+    There might be unreleased fix, but 1.3.1 seems Ok.
 
 * Features
 ** Localization
@@ -37,7 +31,6 @@
    - someone created new event
    - removed one (or changed status)
    - rescheduled to different hour
-** TODO OWA plugin: Gather events from OWA calendar                     :OWA:
 ** TODO Handle a "private" tag                                          :ORG:
    - Hide headlines of private tags
 ** TODO Implement a generic "help" command
@@ -50,22 +43,22 @@
    mon, tue, wed, thu, fri, sat, sun (next)
    hh:mm - hour, minute
    And schedule using given date (or treat as appointment?)
+** TODO Make sleekxmpp work over socks proxy or over tunneled port
+   Currently tunneled port breaks TLS domain checking.
+   Certificate is for SRV record, not for JID domain.
+
+   Update: I lacked pyasn1 on one server and it didn't verify cert there at all.
+   Where: sleekxmpp: cert.py / verify()
+   gets expected from jid. tries to get srv from cert (but doesn't; and can it?)
+   Maybe my cert is bad but pidgin likes it.
+** DONE OWA plugin: Gather events from OWA calendar                     :OWA:
+** DONE Show nice info when config file can't be found
+   CLOSED: [2018-06-02 Sat 19:17]
+** DONE Show '--now--' marker after all the appointments
+   CLOSED: [2018-06-02 Sat 19:15]
+
 
 * Tasks
-** DONE Settle on a name.
-   CLOSED: [2018-06-13 Wed 22:10]
-   - orgassist is not completely unique name.
-   - I'm trying to use gender neutral names.
-   - http://www.thesaurus.com/browse/assistant
-     orgally? orgmate?
-     botally, botmate seem taken
-   - "orgremote" is technical, but unique.
-   - "orgbot" is taken, but seems to be a dead repo.
-
-     Finally: Keeping "OrgAssist".
-     We even got logo! Thanks to TJ.
-
-** TODO Deploy a work-instance.
 ** TODO Make sure all important stuff gets log.info().
    - Note taken on [2018-06-02 Sat 11:24] \\
      In progress; started converting old prints() and adding logging.
@@ -85,6 +78,19 @@
    - for scheduling: 2d, 2h, 1w2d.
 ** TODO Disambiguation using 'plugin:' prefix for commands.
 ** TODO Don't use naive datetimes, handle timezones or at least prepare for it.
+** DONE Settle on a name.
+   CLOSED: [2018-06-13 Wed 22:10]
+   - orgassist is not completely unique name.
+   - I'm trying to use gender neutral names.
+   - http://www.thesaurus.com/browse/assistant
+     orgally? orgmate?
+     botally, botmate seem taken
+   - "orgremote" is technical, but unique.
+   - "orgbot" is taken, but seems to be a dead repo.
+
+     Finally: Keeping "OrgAssist".
+     We even got logo! Thanks to TJ.
+** DONE Deploy a work-instance.
 
 * Half-baked ideas
 ** Communication plugins

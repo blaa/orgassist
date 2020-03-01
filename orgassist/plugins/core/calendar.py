@@ -22,7 +22,12 @@ class CalendarCore(AssistantPlugin):
 
         # At certain points of day remind boss about agenda.
         for time in self.agenda_times:
-            self.scheduler.every().day.at(time).do(self.send_agenda)
+            try:
+                self.scheduler.every().day.at(time).do(self.send_agenda)
+            except schedule.ScheduleValueError:
+                log.error("Invalid agenda time specified '%s', use HH:MM format",
+                          time)
+                raise
 
         # When scheduling notifications, store time of last scheduled event so
         # it won't be scheduled again. Do it separately for each

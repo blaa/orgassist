@@ -1,4 +1,3 @@
-
 from sleekxmpp import ClientXMPP
 from sleekxmpp.thirdparty import socks
 
@@ -21,17 +20,8 @@ class XmppBot:
     def connect(self, config):
         "Connect to XMPP server"
         socks_cfg = config.get('socks_proxy', required=False)
-        if socks_cfg is not None:
-            # TODO: Doesn't work yet. Doesn't implement a makelist
-            socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,
-                                  socks_cfg.get('host', assert_type=str),
-                                  socks_cfg.get('port', assert_type=int),
-                                  rdns=True)
-            socket = socks.socksocket
-        else:
-            socket = None
 
-        self.client = ClientXMPP(self.jid, config.password, socket=socket)
+        self.client = ClientXMPP(self.jid, config.password)
         proxy_cfg = config.get('http_proxy', required=False)
         if proxy_cfg is not None:
             self.client.use_proxy = True
