@@ -138,15 +138,19 @@ def main_loop(program):
     while True:
         program['scheduler'].run_pending()
         idle = program['scheduler'].idle_seconds
-        # Limit wakeups and sleep long. Try to omit short-long sleep
-        # cycles. Don't sleep too long: bot communication works in separate
-        # thread and while we are sleeping user might cause action which
-        # schedules something.
-        target = 30
+        # Limit wakeups and sleep long, but not too long: bot communication
+        # works in separate thread and while we are sleeping user might cause
+        # action which schedules something.
+
+        # Try to sleep evenly, instead of doing jumps of 30s + 3s sleep for a
+        # total 33s idle time (instead will sleep 17 + 16 seconds)
+        target = 30 # seconds
         if idle > 2 * target:
             idle = target
         elif idle > target:
             idle = idle // 2 + 1
+        elif idle < 0:
+            idle = 0
         sleep(idle)
         try:
             program['scheduler'].run_pending()
