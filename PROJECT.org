@@ -1,4 +1,4 @@
- #+TITLE: OrgAssist project management
+#+TITLE: OrgAssist project management
 
 * Changelog
 ** 0.6
@@ -46,7 +46,6 @@
 ** TODO Make sleekxmpp work over socks proxy or over tunneled port
    Currently tunneled port breaks TLS domain checking.
    Certificate is for SRV record, not for JID domain.
-
    Update: I lacked pyasn1 on one server and it didn't verify cert there at all.
    Where: sleekxmpp: cert.py / verify()
    gets expected from jid. tries to get srv from cert (but doesn't; and can it?)
@@ -93,6 +92,14 @@
 ** DONE Deploy a work-instance.
 
 * Half-baked ideas
+** from readme
+  - other bot-interfaces: irc interface, email interface, web interface,
+    android push-notification interface,
+  - caldav integration,
+  - rescheduling tasks and snoozing notifications using remote commands,
+  - intelligent capturing which handles tags and dates,
+  - changing task state,
+
 ** Communication plugins
 *** Facebook messenger bot
     email/password approach:

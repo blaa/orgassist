@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ENV=~/orgsec_ENV
+ENV=$HOME/ENV
 python3 -m venv $ENV
 source $ENV/bin/activate
 

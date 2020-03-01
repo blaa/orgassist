@@ -2,32 +2,26 @@
 
 "orgassist" is a bot - an assistant who handles your appointments, tasks and
 note-taking when you're away from your computer. It can integrate multiple
-sources of notifications and use multiple different communication interfaces -
-by default XMPP.
+sources of tasks and appointments and use multiple different communication
+interfaces to notify you in various ways.
+
+It's architected to be easily expandable. Planned features can be found in
+PROJECT.org file. README describes the current project state.
 
 Currently working functions include:
-- Bidirectional communication over XMPP.
-- Notifying in advance about planned appointments.
-- Generating and sending an agenda for the current day.
-- Reading events from org-mode tree (schedules, deadlines, appointments)
+- Notifying you in advance about appointments.
+- Showing you the current agenda to remind you about today's appointments,
+  planned and due tasks.
+- Reading events from your org-mode tree (schedules, deadlines and appointments)
 - Reading events from Exchange calendar.
 - Taking notes and storing in an org-mode inbox file.
-
-It's architected to be easily expandable, currently planned features:
-- other bot-interfaces: irc interface, email interface, web interface,
-  android push-notification interface,
-- caldav integration,
-- rescheduling tasks and snoozing notifications using remote commands,
-- intelligent capturing which handles tags and dates,
-- changing task state,
-- incremental search,
-- etc.
-
+- Incrementally searching through your calendar and tasks.
+- Bidirectional communication over XMPP (Jabber).
 
 But why?
 ===========
 
-* Do you love your org-mode, but still struggle to get the agenda or
+* Do you love your org-mode, but still struggle to get your agenda or
   notifications on your two mobile devices?
 * You have two org-mode trees - one for work, one for private planning?
 * And appointments in Outlook or Google Calendar?
