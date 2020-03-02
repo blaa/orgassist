@@ -1,0 +1,18 @@
+# Container image for development.
+# examples:
+# docker-compose build
+# docker-compose up
+# docker-compose run --rm orgassist ./assist.py --test --config /app/config.yml
+# docker-compose exec bash (in running container)
+
+version: "2.1"
+
+services:
+  orgassist:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - './:/app'
+      - '~/_org:/org'
+    command: ./assist.py --config /app/config.yml
