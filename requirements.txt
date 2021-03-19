@@ -4,5 +4,5 @@ dnspython==1.16.0
 
 PyYAML==5.3
 schedule==0.6.0
-Jinja2==2.11.1
+Jinja2==2.11.3
 pytz==2019.3
