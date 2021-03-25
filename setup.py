@@ -22,7 +22,7 @@ setuptools.setup(
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=[
-        'PyYAML==5.3',
+        'PyYAML==5.4',
         'sleekxmpp==1.3.1',
         'schedule>=0.6.0',
         'Jinja2>=2.11.1',
